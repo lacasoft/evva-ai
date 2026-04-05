@@ -10,6 +10,9 @@ import {
   createCreditCard, getUserCreditCards,
   createTransaction, getTransactions, getMonthSummary,
   createSavingsGoal, getUserSavingsGoals, updateSavingsGoal,
+  createMedication, getUserMedications, updateMedication,
+  createHabit, getUserHabits, logHabit, getTodayProgress,
+  createEmergencyContact, getUserEmergencyContacts,
 } from '@evva/database';
 import {
   getGoogleAuthUrl, refreshGoogleToken,
@@ -961,6 +964,274 @@ export class ToolsService {
           } catch (error) {
             this.logger.error(`Weather fetch failed: ${error}`);
             return { success: false, error: 'No se pudo obtener el clima' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // translate — traducir texto entre idiomas
+      // ----------------------------------------------------------
+      translate: tool({
+        description: 'Traduce texto entre idiomas. Úsalo cuando el usuario pida traducir algo.',
+        parameters: z.object({
+          text: z.string().describe('Texto a traducir'),
+          target_language: z.string().describe('Idioma destino (ej: "inglés", "francés", "portugués")'),
+          source_language: z.string().optional().describe('Idioma origen (se detecta automáticamente si no se especifica)'),
+        }),
+        execute: async ({ text, target_language, source_language }) => {
+          // Claude already knows how to translate — just return instruction for the LLM
+          return {
+            success: true,
+            instruction: `Traduce el siguiente texto ${source_language ? 'de ' + source_language : ''} a ${target_language}: "${text}"`,
+            note: 'El LLM traduce directamente, no se necesita API externa',
+          };
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // calculate_exchange_rate — tipo de cambio entre divisas
+      // ----------------------------------------------------------
+      calculate_exchange_rate: tool({
+        description: 'Obtiene el tipo de cambio actual entre divisas. Úsalo cuando pregunten por tipo de cambio, conversión de moneda, o cuánto vale el dólar.',
+        parameters: z.object({
+          from: z.string().default('USD').describe('Moneda origen (código ISO: USD, EUR, MXN, etc.)'),
+          to: z.string().default('MXN').describe('Moneda destino'),
+          amount: z.number().default(1).describe('Cantidad a convertir'),
+        }),
+        execute: async ({ from, to, amount }) => {
+          try {
+            const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${from.toUpperCase()}`);
+            if (!response.ok) return { success: false, error: 'No se pudo obtener el tipo de cambio' };
+            const data = (await response.json()) as { rates: Record<string, number> };
+            const rate = data.rates[to.toUpperCase()];
+            if (!rate) return { success: false, error: `No se encontró la moneda ${to}` };
+            return {
+              success: true,
+              from: from.toUpperCase(),
+              to: to.toUpperCase(),
+              rate,
+              amount,
+              result: Math.round(amount * rate * 100) / 100,
+            };
+          } catch (error) {
+            return { success: false, error: 'Error al consultar tipo de cambio' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // add_medication — registrar medicamento
+      // ----------------------------------------------------------
+      add_medication: tool({
+        description: 'Registra un medicamento que el usuario toma regularmente. Úsalo cuando diga que toma alguna medicina, pastilla o tratamiento.',
+        parameters: z.object({
+          name: z.string().describe('Nombre del medicamento (ej: "Metformina 500mg")'),
+          dosage: z.string().optional().describe('Dosis (ej: "1 pastilla", "10ml")'),
+          frequency: z.enum(['daily', 'twice_daily', 'three_times', 'weekly']).default('daily').describe('Frecuencia'),
+          times: z.array(z.string()).describe('Horas de toma en formato HH:MM (ej: ["08:00", "20:00"])'),
+          notes: z.string().optional().describe('Notas (ej: "Tomar con alimentos")'),
+        }),
+        execute: async ({ name, dosage, frequency, times, notes }) => {
+          try {
+            const med = await createMedication({ userId: user.id, name, dosage, frequency, times, notes });
+            this.logger.log(`Medication added for user ${user.id}: ${name}`);
+            return { success: true, medicationId: med.id, name, times };
+          } catch (error) {
+            return { success: false, error: 'No se pudo registrar el medicamento' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // get_medications — ver medicamentos activos
+      // ----------------------------------------------------------
+      get_medications: tool({
+        description: 'Muestra los medicamentos activos del usuario. Úsalo cuando pregunte por sus medicinas o tratamiento.',
+        parameters: z.object({}),
+        execute: async () => {
+          try {
+            const meds = await getUserMedications(user.id);
+            if (meds.length === 0) return { success: true, medications: [], message: 'No tienes medicamentos registrados.' };
+            return {
+              success: true,
+              medications: meds.map(m => ({
+                id: m.id, name: m.name, dosage: m.dosage, frequency: m.frequency, times: m.times, notes: m.notes,
+              })),
+            };
+          } catch (error) {
+            return { success: false, error: 'No se pudieron obtener los medicamentos' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // create_habit — crear hábito para trackear
+      // ----------------------------------------------------------
+      create_habit: tool({
+        description: 'Crea un hábito para trackear diariamente. Úsalo cuando el usuario quiera llevar control de agua, ejercicio, lectura, etc.',
+        parameters: z.object({
+          name: z.string().describe('Nombre del hábito (ej: "Tomar agua", "Ejercicio")'),
+          target_per_day: z.number().min(1).default(1).describe('Meta diaria (ej: 8 vasos, 30 minutos)'),
+          unit: z.string().optional().describe('Unidad (ej: "vasos", "minutos", "veces")'),
+        }),
+        execute: async ({ name, target_per_day, unit }) => {
+          try {
+            const habit = await createHabit({ userId: user.id, name, targetPerDay: target_per_day, unit });
+            this.logger.log(`Habit created for user ${user.id}: ${name}`);
+            return { success: true, habitId: habit.id, name, target: target_per_day, unit };
+          } catch (error) {
+            return { success: false, error: 'No se pudo crear el hábito' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // log_habit — registrar progreso de un hábito
+      // ----------------------------------------------------------
+      log_habit: tool({
+        description: 'Registra progreso en un hábito. Úsalo cuando el usuario diga "ya tomé agua", "hice ejercicio", "ya medité", etc.',
+        parameters: z.object({
+          habit_name: z.string().describe('Nombre del hábito'),
+          count: z.number().min(1).default(1).describe('Cantidad a registrar'),
+        }),
+        execute: async ({ habit_name, count }) => {
+          try {
+            const habits = await getUserHabits(user.id);
+            const habit = habits.find(h => h.name.toLowerCase().includes(habit_name.toLowerCase()));
+            if (!habit) return { success: false, error: `No encontré un hábito llamado "${habit_name}"` };
+            const today = new Date().toISOString().split('T')[0];
+            await logHabit(habit.id, user.id, today, count);
+            return { success: true, habit: habit.name, logged: count, unit: habit.unit };
+          } catch (error) {
+            return { success: false, error: 'No se pudo registrar el progreso' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // get_habit_progress — ver progreso de hábitos de hoy
+      // ----------------------------------------------------------
+      get_habit_progress: tool({
+        description: 'Muestra el progreso de los hábitos del día. Úsalo cuando pregunte "¿cómo voy con mis hábitos?" o "¿ya tomé agua hoy?".',
+        parameters: z.object({}),
+        execute: async () => {
+          try {
+            const progress = await getTodayProgress(user.id);
+            if (progress.length === 0) return { success: true, habits: [], message: 'No tienes hábitos configurados.' };
+            return {
+              success: true,
+              habits: progress.map(p => ({
+                name: p.habit.name, logged: p.logged, target: p.target,
+                unit: p.habit.unit, completed: p.logged >= p.target,
+              })),
+            };
+          } catch (error) {
+            return { success: false, error: 'No se pudo obtener el progreso' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // add_emergency_contact — agregar contacto de emergencia
+      // ----------------------------------------------------------
+      add_emergency_contact: tool({
+        description: 'Registra un contacto de emergencia. Úsalo cuando el usuario quiera guardar a alguien como contacto de emergencia.',
+        parameters: z.object({
+          name: z.string().describe('Nombre del contacto'),
+          phone: z.string().describe('Teléfono'),
+          relationship: z.string().describe('Relación (hijo, esposa, doctor, vecino, etc.)'),
+          is_primary: z.boolean().default(false).describe('true si es el contacto principal'),
+        }),
+        execute: async ({ name, phone, relationship, is_primary }) => {
+          try {
+            const contact = await createEmergencyContact({
+              userId: user.id, name, phone, relationship, isPrimary: is_primary,
+            });
+            this.logger.log(`Emergency contact added for user ${user.id}: ${name}`);
+            return { success: true, contactId: contact.id, name, phone, relationship };
+          } catch (error) {
+            return { success: false, error: 'No se pudo registrar el contacto de emergencia' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // get_emergency_contacts — ver contactos de emergencia
+      // ----------------------------------------------------------
+      get_emergency_contacts: tool({
+        description: 'Muestra los contactos de emergencia del usuario.',
+        parameters: z.object({}),
+        execute: async () => {
+          try {
+            const contacts = await getUserEmergencyContacts(user.id);
+            if (contacts.length === 0) return { success: true, contacts: [], message: 'No tienes contactos de emergencia.' };
+            return {
+              success: true,
+              contacts: contacts.map(c => ({
+                name: c.name, phone: c.phone, relationship: c.relationship, isPrimary: c.isPrimary,
+              })),
+            };
+          } catch (error) {
+            return { success: false, error: 'No se pudieron obtener los contactos de emergencia' };
+          }
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // draft_message — generar un mensaje formal o informal
+      // ----------------------------------------------------------
+      draft_message: tool({
+        description: 'Genera un mensaje formal o informal para el usuario. Úsalo cuando pida "escribe un mensaje para mi jefe", "redacta un correo", "ayúdame a escribir...".',
+        parameters: z.object({
+          recipient: z.string().describe('Para quién es el mensaje (jefe, doctor, cliente, etc.)'),
+          purpose: z.string().describe('Propósito del mensaje (pedir permiso, agradecer, reclamar, etc.)'),
+          tone: z.enum(['formal', 'informal', 'friendly', 'professional']).default('professional').describe('Tono del mensaje'),
+          key_points: z.array(z.string()).optional().describe('Puntos clave que debe incluir'),
+          context: z.string().optional().describe('Contexto adicional'),
+        }),
+        execute: async ({ recipient, purpose, tone, key_points, context }) => {
+          return {
+            success: true,
+            instruction: `Genera un mensaje ${tone} para ${recipient}. Propósito: ${purpose}.${key_points ? ' Puntos clave: ' + key_points.join(', ') : ''}${context ? ' Contexto: ' + context : ''}`,
+          };
+        },
+      }),
+
+      // ----------------------------------------------------------
+      // summarize_news — buscar y resumir noticias
+      // ----------------------------------------------------------
+      summarize_news: tool({
+        description: 'Busca y resume las noticias más relevantes del momento. Úsalo cuando el usuario pregunte por noticias, qué está pasando, o quiera un resumen informativo.',
+        parameters: z.object({
+          topic: z.string().optional().describe('Tema específico (ej: "México", "tecnología", "deportes")'),
+          count: z.number().min(1).max(5).default(3).describe('Cantidad de noticias'),
+        }),
+        execute: async ({ topic, count }) => {
+          const apiKey = process.env.BRAVE_SEARCH_API_KEY;
+          if (!apiKey) {
+            return { success: false, error: 'Búsqueda de noticias no disponible (falta BRAVE_SEARCH_API_KEY)' };
+          }
+          try {
+            const query = topic ? `noticias ${topic} hoy` : 'noticias importantes hoy México';
+            const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${count}&freshness=pd&text_decorations=false`;
+            const response = await fetch(url, {
+              headers: {
+                Accept: 'application/json',
+                'X-Subscription-Token': apiKey,
+              },
+            });
+            if (!response.ok) return { success: false, error: 'Error buscando noticias' };
+            const data = (await response.json()) as {
+              web?: { results: Array<{ title: string; description: string; url: string }> };
+            };
+            const results = data.web?.results.slice(0, count).map(r => ({
+              title: r.title,
+              snippet: r.description,
+              url: r.url,
+            })) ?? [];
+            return { success: true, topic: topic ?? 'general', news: results };
+          } catch (error) {
+            return { success: false, error: 'Error al buscar noticias' };
           }
         },
       }),

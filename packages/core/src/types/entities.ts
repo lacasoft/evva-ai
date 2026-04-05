@@ -230,6 +230,59 @@ export interface SavingsGoal {
 }
 
 // ============================================================
+// Medication — seguimiento de medicamentos
+// ============================================================
+export interface Medication {
+  id: string;
+  userId: string;
+  name: string;
+  dosage?: string;
+  frequency: string;
+  times: string[];
+  notes?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================================
+// Habit — seguimiento de hábitos
+// ============================================================
+export interface Habit {
+  id: string;
+  userId: string;
+  name: string;
+  targetPerDay: number;
+  unit?: string;
+  reminderTimes?: string[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface HabitLog {
+  id: string;
+  habitId: string;
+  userId: string;
+  date: string;
+  count: number;
+  createdAt: Date;
+}
+
+// ============================================================
+// EmergencyContact — contacto de emergencia
+// ============================================================
+export interface EmergencyContact {
+  id: string;
+  userId: string;
+  name: string;
+  phone: string;
+  relationship: string;
+  isPrimary: boolean;
+  createdAt: Date;
+}
+
+// ============================================================
 // UserPreferences — configuración personal
 // ============================================================
 export interface UserPreferences {
