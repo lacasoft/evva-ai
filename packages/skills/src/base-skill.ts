@@ -6,6 +6,17 @@ export interface SkillContext {
   assistant: Assistant;
   /** OAuth providers the user has connected (checked at request time) */
   connectedProviders?: string[];
+  /** Gateway services exposed to skills */
+  services?: {
+    scheduleReminder?: (params: {
+      userId: string;
+      telegramId: number;
+      message: string;
+      assistantName: string;
+      triggerAt: Date;
+      additionalContext?: string;
+    }) => Promise<string>;
+  };
 }
 
 export interface SkillDefinition {

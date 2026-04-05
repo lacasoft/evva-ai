@@ -59,11 +59,18 @@ export class SkillRegistry {
     const connected = ctx.connectedProviders ?? [];
 
     for (const skill of this.getEnabled()) {
+      const skillTools = skill.buildTools(ctx);
+
       if (skill.requiresOAuth && !connected.includes(skill.requiresOAuth)) {
-        // Skip OAuth skills that aren't connected (connect_* tool handles it)
+        // OAuth not connected: only expose connect_* tools so user can initiate connection
+        for (const [name, t] of Object.entries(skillTools)) {
+          if (name.startsWith("connect_")) {
+            tools[name] = t;
+          }
+        }
         continue;
       }
-      const skillTools = skill.buildTools(ctx);
+
       Object.assign(tools, skillTools);
     }
 

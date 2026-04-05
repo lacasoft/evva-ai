@@ -586,17 +586,27 @@ Puedes enviarme audios y los proceso como texto.
     if (!text?.trim()) return;
 
     try {
-      // Si el mensaje es muy largo, lo dividimos
+      const sendChunk = async (chunk: string) => {
+        try {
+          // Intentar con Markdown para bold, italic, etc.
+          await this.bot.api.sendMessage(telegramId, chunk, {
+            parse_mode: "Markdown",
+          });
+        } catch {
+          // Si Markdown falla (formato inválido), enviar como texto plano
+          const plain = chunk.replace(/[*_`\[\]]/g, "");
+          await this.bot.api.sendMessage(telegramId, plain);
+        }
+      };
+
       if (text.length <= LIMITS.TELEGRAM_MAX_MESSAGE_LENGTH) {
-        await this.bot.api.sendMessage(telegramId, text);
+        await sendChunk(text);
         return;
       }
 
-      // Dividir en chunks respetando párrafos
       const chunks = this.splitMessage(text);
       for (const chunk of chunks) {
-        await this.bot.api.sendMessage(telegramId, chunk);
-        // Pequeña pausa entre mensajes para evitar rate limiting
+        await sendChunk(chunk);
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
     } catch (error) {
