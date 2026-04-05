@@ -45,6 +45,9 @@ export {
   getPreferences,
   upsertPreferences,
   getUsersWithBriefingAt,
+  setFinanceSecret,
+  getFinanceSecret,
+  disableFinanceSecret,
 } from "./repositories/preferences.repository.js";
 
 export {
