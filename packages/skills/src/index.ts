@@ -28,6 +28,8 @@ export { briefingSkill } from "./briefing/index.js";
 export { voiceSkill } from "./voice/index.js";
 export { visionSkill } from "./vision/index.js";
 export { searchSkill } from "./search/index.js";
+export { birthdaysSkill } from "./birthdays/index.js";
+export { recipesSkill } from "./recipes/index.js";
 
 // Register all skills
 import { skillRegistry } from "./registry.js";
@@ -49,6 +51,8 @@ import { briefingSkill } from "./briefing/index.js";
 import { voiceSkill } from "./voice/index.js";
 import { visionSkill } from "./vision/index.js";
 import { searchSkill } from "./search/index.js";
+import { birthdaysSkill } from "./birthdays/index.js";
+import { recipesSkill } from "./recipes/index.js";
 
 skillRegistry.register(memorySkill);
 skillRegistry.register(notesSkill);
@@ -68,3 +72,5 @@ skillRegistry.register(briefingSkill);
 skillRegistry.register(voiceSkill);
 skillRegistry.register(visionSkill);
 skillRegistry.register(searchSkill);
+skillRegistry.register(birthdaysSkill);
+skillRegistry.register(recipesSkill);
