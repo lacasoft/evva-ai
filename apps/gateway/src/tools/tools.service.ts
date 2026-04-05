@@ -1,8 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import type { Tool } from "ai";
 import type { User, Assistant } from "@evva/core";
-import { skillRegistry, type SkillContext } from "@evva/skills";
-import { query } from "@evva/database";
+import { skillRegistry, type SkillContext, buildRuntimeTools } from "@evva/skills";
+import { query, getUserRuntimeSkills } from "@evva/database";
 import { CacheService } from "../cache/cache.service.js";
 import { MemoryService } from "../memory/memory.service.js";
 import { SchedulerService } from "../scheduler/scheduler.service.js";
@@ -37,6 +37,25 @@ export class ToolsService {
 
     const tools = skillRegistry.buildAllTools(ctx);
     const promptInstructions = skillRegistry.getPromptInstructions(ctx);
+
+    // Load user's runtime skills (declarative HTTP-based skills)
+    try {
+      const runtimeSkills = await getUserRuntimeSkills(user.id);
+      for (const rs of runtimeSkills) {
+        const runtimeTools = buildRuntimeTools(rs.config);
+        Object.assign(tools, runtimeTools);
+        promptInstructions.push(
+          ...rs.config.tools.map((t) => `- ${t.name}: ${t.description} (runtime skill)`),
+        );
+      }
+      if (runtimeSkills.length > 0) {
+        this.logger.debug(
+          `Loaded ${runtimeSkills.length} runtime skills for user ${user.id}`,
+        );
+      }
+    } catch (err) {
+      this.logger.error(`Failed to load runtime skills: ${err}`);
+    }
 
     this.logger.debug(
       `Built ${Object.keys(tools).length} tools for user ${user.id} (providers: ${connectedProviders.join(",") || "none"})`,

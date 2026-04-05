@@ -1,5 +1,6 @@
 export { SkillRegistry, skillRegistry } from "./registry.js";
 export type { SkillDefinition, SkillContext } from "./base-skill.js";
+export { buildRuntimeTools } from "./runtime-loader.js";
 
 // Core skills
 export { memorySkill } from "./memory/index.js";
@@ -32,6 +33,7 @@ export { briefingSkill } from "./briefing/index.js";
 export { voiceSkill } from "./voice/index.js";
 export { visionSkill } from "./vision/index.js";
 export { searchSkill } from "./search/index.js";
+export { skillCreatorSkill } from "./skill-creator/index.js";
 export { birthdaysSkill } from "./birthdays/index.js";
 export { recipesSkill } from "./recipes/index.js";
 
@@ -56,6 +58,7 @@ import { briefingSkill } from "./briefing/index.js";
 import { voiceSkill } from "./voice/index.js";
 import { visionSkill } from "./vision/index.js";
 import { searchSkill } from "./search/index.js";
+import { skillCreatorSkill } from "./skill-creator/index.js";
 import { birthdaysSkill } from "./birthdays/index.js";
 import { recipesSkill } from "./recipes/index.js";
 import { spotifySkill } from "./spotify/index.js";
@@ -79,6 +82,7 @@ skillRegistry.register(briefingSkill);
 skillRegistry.register(voiceSkill);
 skillRegistry.register(visionSkill);
 skillRegistry.register(searchSkill);
+skillRegistry.register(skillCreatorSkill);
 skillRegistry.register(birthdaysSkill);
 skillRegistry.register(recipesSkill);
 skillRegistry.register(spotifySkill);

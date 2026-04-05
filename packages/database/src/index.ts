@@ -20,6 +20,17 @@ export {
 } from "./repositories/users.repository.js";
 
 export {
+  createRuntimeSkill,
+  getUserRuntimeSkills,
+  disableRuntimeSkill,
+  deleteRuntimeSkill,
+} from "./repositories/runtime-skills.repository.js";
+export type {
+  RuntimeSkillConfig,
+  RuntimeSkillRecord,
+} from "./repositories/runtime-skills.repository.js";
+
+export {
   saveMessage,
   getRecentMessages,
   getSessionMessages,
