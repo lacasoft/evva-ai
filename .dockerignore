@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.github
+.claude
+.claude-flow
+.env
+.env.local
+*.md
+LICENSE
+docs
+coverage
+.vscode
+.idea

@@ -105,37 +105,35 @@ PostgreSQL con pgvector y Redis deben estar corriendo localmente.
 
 ### Instalacion
 
+### Opcion A — Docker Compose (recomendado)
+
 ```bash
-git clone https://github.com/nicobistolfi/evva.git
-cd evva
-pnpm install
+git clone https://github.com/lacasoft/evva-ai.git
+cd evva-ai
+cp .env.example .env
+# Edita .env con tus credenciales (ver .env.example para todas las variables)
+
+docker compose up
 ```
 
-### Variables de entorno
+Listo. PostgreSQL, Redis, migraciones, gateway y worker arrancan automaticamente.
+
+### Opcion B — Setup manual
 
 ```bash
+git clone https://github.com/lacasoft/evva-ai.git
+cd evva-ai
+pnpm install
 cp .env.example .env
 # Edita .env con tus credenciales
-```
 
-### Base de datos
-
-```bash
-createdb evva
 pnpm db:migrate
-```
 
-### Correr en desarrollo
-
-```bash
 # Terminal 1 — Gateway (bot de Telegram)
 pnpm dev:gateway
 
 # Terminal 2 — Worker (procesadores de BullMQ)
 pnpm dev:worker
-
-# O ambos juntos:
-pnpm dev
 ```
 
 El bot arranca en modo **long polling** en desarrollo. No necesitas configurar webhooks.
