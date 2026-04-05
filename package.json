@@ -1,0 +1,33 @@
+{
+  "name": "evva",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evva — Tu asistente personal con memoria real y acción proactiva",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:gateway": "pnpm --filter @evva/gateway dev",
+    "dev:worker": "pnpm --filter @evva/worker dev",
+    "dev": "concurrently \"pnpm dev:gateway\" \"pnpm dev:worker\"",
+    "build": "pnpm --filter @evva/core build && pnpm --filter @evva/database build && pnpm --filter @evva/ai build && pnpm --filter @evva/gateway build && pnpm --filter @evva/worker build",
+    "build:gateway": "pnpm --filter @evva/gateway build",
+    "build:worker": "pnpm --filter @evva/worker build",
+    "test": "pnpm --recursive test",
+    "lint": "pnpm --recursive lint",
+    "typecheck": "pnpm --recursive typecheck",
+    "db:migrate": "pnpm --filter @evva/database migrate"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

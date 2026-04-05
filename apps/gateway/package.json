@@ -1,0 +1,37 @@
+{
+  "name": "@evva/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@evva/core": "workspace:*",
+    "@evva/database": "workspace:*",
+    "@evva/ai": "workspace:*",
+    "@nestjs/common": "^10.4.0",
+    "@nestjs/core": "^10.4.0",
+    "@nestjs/platform-express": "^10.4.0",
+    "@nestjs/config": "^3.2.0",
+    "@nestjs/schedule": "^4.1.0",
+    "bullmq": "^5.13.0",
+    "grammy": "^1.30.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0",
+    "ai": "^4.0.0",
+    "zod": "^3.23.0",
+    "ioredis": "^5.4.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.0",
+    "@nestjs/testing": "^10.4.0",
+    "@types/express": "^4.17.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  }
+}

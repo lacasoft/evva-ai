@@ -1,0 +1,29 @@
+app = "koliman-worker"
+primary_region = "mia"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+
+# El worker no expone HTTP — solo procesa queues
+# Pero necesita un proceso activo
+[[services]]
+  protocol = "tcp"
+  internal_port = 3001
+
+[checks]
+  # No hay health check HTTP — el worker no expone endpoints
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# Auto-sleep: el worker puede dormir si no hay jobs
+# (BullMQ lo despertará cuando llegue trabajo)
+[http_service]
+  internal_port = 3001
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
