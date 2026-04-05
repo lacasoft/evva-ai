@@ -4,6 +4,8 @@ import type { User, Assistant, AgeRange } from "@evva/core";
 export interface SkillContext {
   user: User;
   assistant: Assistant;
+  /** OAuth providers the user has connected (checked at request time) */
+  connectedProviders?: string[];
 }
 
 export interface SkillDefinition {
@@ -28,12 +30,12 @@ export interface SkillDefinition {
   /** Environment variables required (skill is disabled if any are missing) */
   requiredEnv?: string[];
 
-  /** Whether this skill requires Google OAuth */
-  requiresOAuth?: boolean;
+  /** OAuth provider required (e.g., 'google', 'spotify') */
+  requiresOAuth?: string;
 
   /** Build the tools for this skill, given a user context */
   buildTools: (ctx: SkillContext) => Record<string, Tool>;
 
   /** Lines to add to the system prompt describing this skill's tools */
-  promptInstructions: string[];
+  promptInstructions: string[] | ((ctx: SkillContext) => string[]);
 }

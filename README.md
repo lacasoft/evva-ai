@@ -1,6 +1,10 @@
-# Evva
+<p align="center">
+  <img src="assets/evva-logo.png" alt="Evva" width="200" />
+</p>
 
-**AI-powered personal assistant with real memory and proactive actions. Lives in Telegram.**
+<h1 align="center">Evva</h1>
+
+<p align="center"><strong>AI-powered personal assistant with real memory and proactive actions. Lives in Telegram and WhatsApp.</strong></p>
 
 🌐 [Leer en Español](README.es.md)
 
@@ -29,8 +33,14 @@
 - **Exchange rate calculator** -- live currency conversion
 - **Smart dictation** -- generate formal or informal messages on demand
 - **News summary** -- search and summarize current news
+- **Spotify integration** -- now playing, recent tracks, top tracks, search music
+- **WhatsApp channel** -- same assistant experience on WhatsApp Business API
+- **Birthday tracking** -- proactive birthday reminders from memory
+- **Recipe suggestions** -- suggests recipes based on your grocery list
+- **Redis cache** -- optimized token usage with cached OAuth providers and context
 - **Configurable LLM model** -- Haiku for development, Sonnet for production
 - **Rebrandable** -- change the assistant name via `APP_BRAND_NAME` env var
+- **Multi-channel** -- Telegram + WhatsApp with identical experience
 
 ---
 

@@ -62,6 +62,20 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v || undefined),
+
+  // WhatsApp Cloud API (opcional — habilita el adapter de WhatsApp)
+  WHATSAPP_ACCESS_TOKEN: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+  WHATSAPP_PHONE_NUMBER_ID: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+  WHATSAPP_VERIFY_TOKEN: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;

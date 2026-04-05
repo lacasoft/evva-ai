@@ -4,3 +4,4 @@ export * from "./prompts/builder.js";
 export * from "./transcription/whisper.js";
 export * from "./google/calendar.js";
 export * from "./google/gmail.js";
+export * from "./spotify/client.js";

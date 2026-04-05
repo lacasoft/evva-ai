@@ -20,12 +20,7 @@ export class SkillRegistry {
     return this.getAll().filter((s) => s.forProfiles.includes(profile));
   }
 
-  /** Get skills by category */
-  getByCategory(category: SkillDefinition["category"]): SkillDefinition[] {
-    return this.getAll().filter((s) => s.category === category);
-  }
-
-  /** Check which skills are currently enabled (all required env vars present) */
+  /** Check which skills are currently enabled (env vars present) */
   getEnabled(): SkillDefinition[] {
     return this.getAll().filter((skill) => {
       if (skill.requiredEnv) {
@@ -35,11 +30,36 @@ export class SkillRegistry {
     });
   }
 
-  /** Build all tools from enabled skills for a given user context */
+  /**
+   * Get skills that are fully available for a user context.
+   * Filters out OAuth skills where the user hasn't connected the provider.
+   * Keeps the connect_* tool for unconnected OAuth skills.
+   */
+  getAvailableForUser(ctx: SkillContext): SkillDefinition[] {
+    const connected = ctx.connectedProviders ?? [];
+    return this.getEnabled().filter((skill) => {
+      // Non-OAuth skills are always available
+      if (!skill.requiresOAuth) return true;
+      // OAuth skills are available if the user has connected that provider
+      return connected.includes(skill.requiresOAuth);
+    });
+  }
+
+  /**
+   * Build tools for a user context.
+   * - Fully connected skills: all tools
+   * - OAuth skills not connected: only connect_* tools from the connector skill
+   * - Disabled skills (missing env): no tools
+   */
   buildAllTools(ctx: SkillContext): Record<string, Tool> {
     const tools: Record<string, Tool> = {};
+    const connected = ctx.connectedProviders ?? [];
 
     for (const skill of this.getEnabled()) {
+      if (skill.requiresOAuth && !connected.includes(skill.requiresOAuth)) {
+        // Skip OAuth skills that aren't connected (connect_* tool handles it)
+        continue;
+      }
       const skillTools = skill.buildTools(ctx);
       Object.assign(tools, skillTools);
     }
@@ -47,12 +67,31 @@ export class SkillRegistry {
     return tools;
   }
 
-  /** Get combined prompt instructions from all enabled skills */
-  getPromptInstructions(): string[] {
-    return this.getEnabled().flatMap((s) => s.promptInstructions);
+  /** Get combined prompt instructions from available skills */
+  getPromptInstructions(ctx: SkillContext): string[] {
+    const connected = ctx.connectedProviders ?? [];
+    const instructions: string[] = [];
+
+    for (const skill of this.getEnabled()) {
+      if (skill.requiresOAuth && !connected.includes(skill.requiresOAuth)) {
+        // For unconnected OAuth skills, just mention they're available
+        instructions.push(
+          `- ${skill.name}: Disponible si el usuario conecta ${skill.requiresOAuth}. Usa connect_${skill.requiresOAuth} para generar el link.`,
+        );
+        continue;
+      }
+
+      const pi =
+        typeof skill.promptInstructions === "function"
+          ? skill.promptInstructions(ctx)
+          : skill.promptInstructions;
+      instructions.push(...pi);
+    }
+
+    return instructions;
   }
 
-  /** Get a summary of all skills for display */
+  /** Get a summary of all skills and their status */
   getSummary(): Array<{
     name: string;
     description: string;

@@ -10,7 +10,7 @@ export const gmailSkill: SkillDefinition = {
   category: "communication",
   forProfiles: ["young", "adult", "senior"],
   requiredEnv: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
-  requiresOAuth: true,
+  requiresOAuth: "google",
 
   buildTools: (ctx) => {
     const getGoogleAccessToken = async (
