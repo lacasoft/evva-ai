@@ -157,9 +157,16 @@ export const financeSkill: SkillDefinition = {
           let creditCardId: string | undefined;
           if (payment_method === "credit" && credit_card_last_four) {
             const cards = await getUserCreditCards(ctx.user.id);
-            creditCardId = cards.find(
+            const card = cards.find(
               (c) => c.lastFourDigits === credit_card_last_four,
-            )?.id;
+            );
+            if (!card) {
+              return {
+                success: false,
+                error: `No encontre una tarjeta con terminacion ${credit_card_last_four}. Registrala primero con add_credit_card.`,
+              };
+            }
+            creditCardId = card.id;
           }
           const tx = await createTransaction({
             userId: ctx.user.id,

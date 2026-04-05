@@ -26,7 +26,14 @@ export class ToolsService {
     assistant: Assistant,
   ): Promise<{ tools: Record<string, Tool>; promptInstructions: string[] }> {
     const connectedProviders = await this.getConnectedProviders(user.id);
-    const ctx: SkillContext = { user, assistant, connectedProviders };
+    const ctx: SkillContext = {
+      user,
+      assistant,
+      connectedProviders,
+      services: {
+        scheduleReminder: (params) => this.schedulerService.scheduleReminder(params),
+      },
+    };
 
     const tools = skillRegistry.buildAllTools(ctx);
     const promptInstructions = skillRegistry.getPromptInstructions(ctx);

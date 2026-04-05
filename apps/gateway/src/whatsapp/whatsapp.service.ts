@@ -377,6 +377,9 @@ export class WhatsAppService {
       const chunks = this.splitMessage(text);
 
       for (const chunk of chunks) {
+        // Convert Markdown to WhatsApp format
+        const formatted = this.markdownToWhatsApp(chunk);
+
         const response = await fetch(
           `${GRAPH_API_BASE}/${phoneNumberId}/messages`,
           {
@@ -389,7 +392,7 @@ export class WhatsAppService {
               messaging_product: "whatsapp",
               to,
               type: "text",
-              text: { body: chunk },
+              text: { body: formatted },
             }),
           },
         );
@@ -483,5 +486,25 @@ export class WhatsAppService {
 
     if (current) chunks.push(current.trim());
     return chunks;
+  }
+
+  // ============================================================
+  // Convert Markdown to WhatsApp formatting
+  // Markdown: **bold** _italic_ `code`
+  // WhatsApp: *bold* _italic_ ```code```
+  // ============================================================
+
+  private markdownToWhatsApp(text: string): string {
+    return text
+      // **bold** → *bold*
+      .replace(/\*\*(.+?)\*\*/g, "*$1*")
+      // __bold__ → *bold*
+      .replace(/__(.+?)__/g, "*$1*")
+      // ~~strike~~ → ~strike~
+      .replace(/~~(.+?)~~/g, "~$1~")
+      // Remove markdown headers (## Title → Title)
+      .replace(/^#{1,6}\s+/gm, "")
+      // Remove markdown links [text](url) → text (url)
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
   }
 }

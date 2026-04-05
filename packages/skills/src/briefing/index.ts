@@ -46,7 +46,7 @@ export const briefingSkill: SkillDefinition = {
             enabled,
             time: formatted,
             message: enabled
-              ? `Resumen diario activado a las ${formatted} UTC`
+              ? `Resumen diario activado a las ${formatted} (hora del usuario)`
               : "Resumen diario desactivado",
           };
         } catch {
