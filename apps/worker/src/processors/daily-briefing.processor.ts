@@ -98,6 +98,41 @@ export class DailyBriefingProcessor implements OnModuleInit {
       }
     }
 
+    // Detectar cumpleanos proximos
+    const today = new Date();
+    const birthdayFacts = facts.filter(
+      (f) =>
+        f.content.toLowerCase().includes("cumple") ||
+        f.content.toLowerCase().includes("birthday"),
+    );
+
+    const upcomingBirthdays = birthdayFacts
+      .map((f) => {
+        const dateMatch = f.content.match(/(\d{1,2})[\/\-](\d{1,2})/);
+        if (!dateMatch) return null;
+        const day = parseInt(dateMatch[1]);
+        const month = parseInt(dateMatch[2]) - 1;
+        const next = new Date(today.getFullYear(), month, day);
+        if (next < today) next.setFullYear(today.getFullYear() + 1);
+        const daysUntil = Math.ceil(
+          (next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        return { fact: f.content, daysUntil };
+      })
+      .filter(
+        (b): b is NonNullable<typeof b> => b !== null && b.daysUntil <= 7,
+      )
+      .sort((a, b) => a.daysUntil - b.daysUntil);
+
+    if (upcomingBirthdays.length > 0) {
+      contextParts.push("\nCumpleanos proximos (7 dias):");
+      for (const b of upcomingBirthdays) {
+        contextParts.push(
+          `- ${b.fact} (${b.daysUntil === 0 ? "HOY" : `en ${b.daysUntil} dias`})`,
+        );
+      }
+    }
+
     if (facts.length > 0) {
       contextParts.push(
         `\nDatos que recuerdas del usuario (${facts.length} facts):`,
