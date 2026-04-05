@@ -300,9 +300,14 @@ export interface UserPreferences {
 export type OnboardingStep =
   | 'welcome'
   | 'name_selection'
+  | 'user_name'
+  | 'age_range'
+  | 'interests'
   | 'personality_setup'
   | 'timezone_setup'
   | 'completed';
+
+export type AgeRange = 'young' | 'adult' | 'senior';
 
 export interface OnboardingState {
   userId: string;
@@ -315,6 +320,9 @@ export interface OnboardingState {
 export interface OnboardingData {
   assistantName: string;
   userFirstName: string;
+  userName: string;
+  ageRange: AgeRange;
+  interests: string[];
   timezone: string;
   language: 'es' | 'en';
 }
