@@ -23,6 +23,10 @@
 </p>
 
 <p align="center">
+  <strong>Prueba Evva ahora — sin instalar nada:</strong> <a href="https://t.me/evva_dev_bot">t.me/evva_dev_bot</a>
+</p>
+
+<p align="center">
   <img src="assets/intro.gif" alt="Evva Demo" width="350" />
 </p>
 
