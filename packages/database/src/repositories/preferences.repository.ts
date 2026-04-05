@@ -79,6 +79,43 @@ export async function getUsersWithBriefingAt(
   }));
 }
 
+export async function setFinanceSecret(
+  userId: string,
+  secretHash: string,
+): Promise<void> {
+  await query(
+    `INSERT INTO user_preferences (user_id, finance_secret_hash, finance_secret_enabled, updated_at)
+     VALUES ($1, $2, true, NOW())
+     ON CONFLICT (user_id) DO UPDATE SET
+       finance_secret_hash = $2,
+       finance_secret_enabled = true,
+       updated_at = NOW()`,
+    [userId, secretHash],
+  );
+}
+
+export async function getFinanceSecret(
+  userId: string,
+): Promise<{ hash: string; enabled: boolean } | null> {
+  const row = await queryOne(
+    "SELECT finance_secret_hash, finance_secret_enabled FROM user_preferences WHERE user_id = $1",
+    [userId],
+  );
+  if (!row || !row.finance_secret_hash) return null;
+  return {
+    hash: row.finance_secret_hash as string,
+    enabled: row.finance_secret_enabled as boolean,
+  };
+}
+
+export async function disableFinanceSecret(userId: string): Promise<void> {
+  await query(
+    `UPDATE user_preferences SET finance_secret_enabled = false, finance_secret_hash = NULL, updated_at = NOW()
+     WHERE user_id = $1`,
+    [userId],
+  );
+}
+
 function mapToPreferences(data: Record<string, unknown>): UserPreferences {
   return {
     userId: data.user_id as string,

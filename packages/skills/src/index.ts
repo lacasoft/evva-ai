@@ -9,6 +9,7 @@ export { remindersSkill } from "./reminders/index.js";
 
 // Finance
 export { financeSkill } from "./finance/index.js";
+export { financeSecuritySkill } from "./finance-security/index.js";
 
 // Health
 export { healthSkill } from "./health/index.js";
@@ -41,6 +42,7 @@ import { notesSkill } from "./notes/index.js";
 import { contactsSkill } from "./contacts/index.js";
 import { remindersSkill } from "./reminders/index.js";
 import { financeSkill } from "./finance/index.js";
+import { financeSecuritySkill } from "./finance-security/index.js";
 import { healthSkill } from "./health/index.js";
 import { emergencySkill } from "./emergency/index.js";
 import { calendarSkill } from "./calendar/index.js";
@@ -63,6 +65,7 @@ skillRegistry.register(notesSkill);
 skillRegistry.register(contactsSkill);
 skillRegistry.register(remindersSkill);
 skillRegistry.register(financeSkill);
+skillRegistry.register(financeSecuritySkill);
 skillRegistry.register(healthSkill);
 skillRegistry.register(emergencySkill);
 skillRegistry.register(calendarSkill);
