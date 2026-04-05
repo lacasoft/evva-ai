@@ -41,12 +41,15 @@ export const recipesSkill: SkillDefinition = {
           .number()
           .optional()
           .describe("Tiempo maximo de preparacion en minutos"),
-        servings: z
-          .number()
-          .default(2)
-          .describe("Numero de porciones"),
+        servings: z.number().default(2).describe("Numero de porciones"),
       }),
-      execute: async ({ ingredients, cuisine, dietary, max_time, servings }) => {
+      execute: async ({
+        ingredients,
+        cuisine,
+        dietary,
+        max_time,
+        servings,
+      }) => {
         try {
           let availableIngredients = ingredients ?? [];
 

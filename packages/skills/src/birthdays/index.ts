@@ -27,7 +27,9 @@ export const birthdaysSkill: SkillDefinition = {
         relationship: z
           .string()
           .optional()
-          .describe("Relacion con el usuario (mama, esposa, amigo, jefe, etc.)"),
+          .describe(
+            "Relacion con el usuario (mama, esposa, amigo, jefe, etc.)",
+          ),
       }),
       execute: async ({ person_name, date, relationship }) => {
         try {
@@ -101,18 +103,12 @@ export const birthdaysSkill: SkillDefinition = {
           const now = new Date();
           const upcoming = birthdayFacts
             .map((f) => {
-              const dateMatch = f.content.match(
-                /(\d{1,2})[\/\-](\d{1,2})/,
-              );
+              const dateMatch = f.content.match(/(\d{1,2})[\/\-](\d{1,2})/);
               if (!dateMatch) return null;
 
               const day = parseInt(dateMatch[1]);
               const month = parseInt(dateMatch[2]) - 1;
-              const nextBirthday = new Date(
-                now.getFullYear(),
-                month,
-                day,
-              );
+              const nextBirthday = new Date(now.getFullYear(), month, day);
 
               // Si ya paso este ano, usar el proximo
               if (nextBirthday < now) {

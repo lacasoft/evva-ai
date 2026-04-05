@@ -236,9 +236,7 @@ export async function getTopTracks(
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(
-      `Spotify top tracks failed: ${response.status} ${error}`,
-    );
+    throw new Error(`Spotify top tracks failed: ${response.status} ${error}`);
   }
 
   const data = (await response.json()) as {
@@ -265,18 +263,13 @@ export async function searchTracks(
     limit: String(limit),
   });
 
-  const response = await fetch(
-    `${SPOTIFY_API}/search?${params.toString()}`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
-  );
+  const response = await fetch(`${SPOTIFY_API}/search?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(
-      `Spotify search failed: ${response.status} ${error}`,
-    );
+    throw new Error(`Spotify search failed: ${response.status} ${error}`);
   }
 
   const data = (await response.json()) as {

@@ -342,6 +342,28 @@ El resumen diario funciona de forma similar: un job recurrente revisa pendientes
 
 ---
 
+## Optimizacion de tokens
+
+Evva esta disenado para minimizar el consumo de tokens por mensaje:
+
+| Optimizacion | Antes | Despues | Ahorro |
+|---|---|---|---|
+| Ventana de historial | 12 mensajes | 6 mensajes | ~480 tokens |
+| maxSteps (rondas de tool calls) | 3 | 2 | ~5,400 tokens |
+| System prompt (bloque de comportamiento) | 225 tokens | 80 tokens | ~145 tokens |
+| Filtro de skills OAuth | 42 tools siempre cargadas | Solo tools conectadas | ~2,000 tokens |
+| Query de providers | 2 llamadas DB por mensaje | 1 llamada cacheada (Redis 5min) | Latencia |
+| Skill registry | Checa env vars en cada llamada | Cache despues de la primera | CPU |
+
+**Reduccion estimada: ~55% (de ~23K a ~10K tokens por mensaje)**
+
+```
+Antes:   [system prompt ~1,400] + [42 tool schemas ~3,000] + [historial ~960] x 3 steps = ~23,000 tokens
+Despues: [system prompt ~1,200] + [~20 tool schemas ~1,500] + [historial ~480] x 2 steps = ~10,000 tokens
+```
+
+---
+
 ## Desarrollo
 
 ### Build completo

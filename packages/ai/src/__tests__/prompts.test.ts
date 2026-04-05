@@ -163,7 +163,7 @@ describe("buildSystemPrompt", () => {
     expect(result).toContain("capacidades");
   });
 
-  it("omits tool section when no skill instructions", () => {
+  it("includes proactive behavior block even without skill instructions", () => {
     const result = buildSystemPrompt({
       assistant: createMockAssistant(),
       timezone: "America/Mexico_City",
@@ -171,7 +171,7 @@ describe("buildSystemPrompt", () => {
       relevantFacts: [],
     });
 
-    expect(result).toContain("save_fact"); // still in the proactive instructions
+    expect(result).toContain("proactivo");
   });
 });
 

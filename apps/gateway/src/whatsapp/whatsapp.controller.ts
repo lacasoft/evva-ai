@@ -39,8 +39,18 @@ export interface WhatsAppIncomingMessage {
   text?: { body: string };
   audio?: { id: string; mime_type: string };
   image?: { id: string; mime_type: string; caption?: string };
-  location?: { latitude: number; longitude: number; name?: string; address?: string };
-  document?: { id: string; mime_type: string; filename?: string; caption?: string };
+  location?: {
+    latitude: number;
+    longitude: number;
+    name?: string;
+    address?: string;
+  };
+  document?: {
+    id: string;
+    mime_type: string;
+    filename?: string;
+    caption?: string;
+  };
 }
 
 @Controller("whatsapp")
@@ -77,7 +87,9 @@ export class WhatsAppController {
 
   @Post("webhook")
   @HttpCode(200)
-  async handleWebhook(@Body() body: WhatsAppWebhookBody): Promise<{ status: string }> {
+  async handleWebhook(
+    @Body() body: WhatsAppWebhookBody,
+  ): Promise<{ status: string }> {
     // WhatsApp expects 200 quickly; process asynchronously
     if (body.object !== "whatsapp_business_account") {
       return { status: "ignored" };

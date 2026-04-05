@@ -129,7 +129,9 @@ export const spotifySkill: SkillDefinition = {
             .min(1)
             .max(50)
             .default(10)
-            .describe("Cantidad de canciones recientes a mostrar (default: 10)"),
+            .describe(
+              "Cantidad de canciones recientes a mostrar (default: 10)",
+            ),
         }),
         execute: async ({ limit }) => {
           try {
@@ -207,7 +209,9 @@ export const spotifySkill: SkillDefinition = {
           "Busca canciones en Spotify por nombre, artista o álbum. " +
           "Úsalo cuando el usuario quiera buscar una canción o artista.",
         parameters: z.object({
-          query: z.string().describe("Texto de búsqueda (canción, artista, etc.)"),
+          query: z
+            .string()
+            .describe("Texto de búsqueda (canción, artista, etc.)"),
           limit: z
             .number()
             .min(1)

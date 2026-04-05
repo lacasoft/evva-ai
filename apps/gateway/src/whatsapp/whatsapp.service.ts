@@ -31,9 +31,7 @@ export class WhatsAppService {
     from: string,
     message: WhatsAppIncomingMessage,
   ): Promise<void> {
-    this.logger.log(
-      `WhatsApp message from ${from}: type=${message.type}`,
-    );
+    this.logger.log(`WhatsApp message from ${from}: type=${message.type}`);
 
     try {
       switch (message.type) {
@@ -64,7 +62,9 @@ export class WhatsAppService {
           );
       }
     } catch (error) {
-      this.logger.error(`Error handling WhatsApp message from ${from}: ${error}`);
+      this.logger.error(
+        `Error handling WhatsApp message from ${from}: ${error}`,
+      );
       await this.sendMessage(
         from,
         "Tuve un problema procesando tu mensaje. Intenta de nuevo.",
@@ -82,21 +82,32 @@ export class WhatsAppService {
     const user = await this.resolveUser(from);
 
     // Check for commands
-    if (text.trim().toLowerCase() === "/start" || text.trim().toLowerCase() === "hola") {
+    if (
+      text.trim().toLowerCase() === "/start" ||
+      text.trim().toLowerCase() === "hola"
+    ) {
       await this.handleStart(from, user);
       return;
     }
 
     if (text.trim().toLowerCase() === "/reset") {
       this.conversationService.resetSession(user.id);
-      await this.sendMessage(from, "Listo, empezamos de cero. \u00bfEn qu\u00e9 te ayudo?");
+      await this.sendMessage(
+        from,
+        "Listo, empezamos de cero. \u00bfEn qu\u00e9 te ayudo?",
+      );
       return;
     }
 
     // Check onboarding
-    const needsOnboarding = await this.onboardingService.needsOnboarding(user.id);
+    const needsOnboarding = await this.onboardingService.needsOnboarding(
+      user.id,
+    );
     if (needsOnboarding) {
-      const response = await this.onboardingService.handleOnboardingMessage(user, text);
+      const response = await this.onboardingService.handleOnboardingMessage(
+        user,
+        text,
+      );
       await this.sendMessage(from, response.message);
       return;
     }
@@ -139,7 +150,10 @@ export class WhatsAppService {
     );
 
     if (!transcribedText.trim()) {
-      await this.sendMessage(from, "No pude entender el audio. \u00bfPodr\u00edas repetirlo?");
+      await this.sendMessage(
+        from,
+        "No pude entender el audio. \u00bfPodr\u00edas repetirlo?",
+      );
       return;
     }
 
@@ -148,7 +162,9 @@ export class WhatsAppService {
     );
 
     // Check onboarding
-    const needsOnboarding = await this.onboardingService.needsOnboarding(user.id);
+    const needsOnboarding = await this.onboardingService.needsOnboarding(
+      user.id,
+    );
     if (needsOnboarding) {
       const response = await this.onboardingService.handleOnboardingMessage(
         user,
@@ -187,7 +203,9 @@ export class WhatsAppService {
 
     const user = await this.resolveUser(from);
 
-    const needsOnboarding = await this.onboardingService.needsOnboarding(user.id);
+    const needsOnboarding = await this.onboardingService.needsOnboarding(
+      user.id,
+    );
     if (needsOnboarding) {
       await this.sendMessage(
         from,
@@ -233,7 +251,9 @@ export class WhatsAppService {
 
     const user = await this.resolveUser(from);
 
-    const needsOnboarding = await this.onboardingService.needsOnboarding(user.id);
+    const needsOnboarding = await this.onboardingService.needsOnboarding(
+      user.id,
+    );
     if (needsOnboarding) {
       await this.sendMessage(
         from,
@@ -244,7 +264,10 @@ export class WhatsAppService {
 
     const assistant = await this.usersService.getAssistant(user.id);
     if (!assistant) {
-      await this.sendMessage(from, "Primero configura tu asistente enviando 'hola'");
+      await this.sendMessage(
+        from,
+        "Primero configura tu asistente enviando 'hola'",
+      );
       return;
     }
 
@@ -291,7 +314,10 @@ export class WhatsAppService {
 
     const assistant = await this.usersService.getAssistant(user.id);
     if (!assistant) {
-      await this.sendMessage(from, "Primero configura tu asistente enviando 'hola'");
+      await this.sendMessage(
+        from,
+        "Primero configura tu asistente enviando 'hola'",
+      );
       return;
     }
 
@@ -313,7 +339,9 @@ export class WhatsAppService {
   // ============================================================
 
   private async handleStart(from: string, user: User): Promise<void> {
-    const needsOnboarding = await this.onboardingService.needsOnboarding(user.id);
+    const needsOnboarding = await this.onboardingService.needsOnboarding(
+      user.id,
+    );
 
     if (needsOnboarding) {
       const welcomeMessage = await this.onboardingService.startOnboarding(user);
@@ -338,7 +366,9 @@ export class WhatsAppService {
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
     if (!accessToken || !phoneNumberId) {
-      this.logger.error("WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID not configured");
+      this.logger.error(
+        "WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID not configured",
+      );
       return;
     }
 

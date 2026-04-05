@@ -341,6 +341,28 @@ The skill is automatically available to the LLM. No other files need to change.
 
 ---
 
+## Token Optimization
+
+Evva is designed to minimize LLM token consumption per message:
+
+| Optimization | Before | After | Savings |
+|---|---|---|---|
+| Conversation history window | 12 messages | 6 messages | ~480 tokens |
+| maxSteps (tool call rounds) | 3 | 2 | ~5,400 tokens |
+| System prompt (behavioral block) | 225 tokens | 80 tokens | ~145 tokens |
+| OAuth skill filtering | All 42 tools always loaded | Only connected tools loaded | ~2,000 tokens |
+| Provider query | 2 DB calls per message | 1 cached call (Redis 5min TTL) | Latency |
+| Skill registry | env check on every call | Cached after first call | CPU |
+
+**Estimated total reduction: ~55% (from ~23K to ~10K tokens per message)**
+
+```
+Before:  [system prompt ~1,400] + [42 tool schemas ~3,000] + [history ~960] x 3 steps = ~23,000 tokens
+After:   [system prompt ~1,200] + [~20 tool schemas ~1,500] + [history ~480] x 2 steps = ~10,000 tokens
+```
+
+---
+
 ## Development
 
 ### Build

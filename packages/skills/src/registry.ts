@@ -4,6 +4,7 @@ import type { SkillContext, SkillDefinition } from "./base-skill.js";
 
 export class SkillRegistry {
   private skills = new Map<string, SkillDefinition>();
+  private enabledCache: SkillDefinition[] | null = null;
 
   /** Register a skill */
   register(skill: SkillDefinition): void {
@@ -20,14 +21,16 @@ export class SkillRegistry {
     return this.getAll().filter((s) => s.forProfiles.includes(profile));
   }
 
-  /** Check which skills are currently enabled (env vars present) */
+  /** Check which skills are currently enabled (env vars present). Cached after first call. */
   getEnabled(): SkillDefinition[] {
-    return this.getAll().filter((skill) => {
+    if (this.enabledCache) return this.enabledCache;
+    this.enabledCache = this.getAll().filter((skill) => {
       if (skill.requiredEnv) {
         return skill.requiredEnv.every((key) => !!process.env[key]);
       }
       return true;
     });
+    return this.enabledCache;
   }
 
   /**
