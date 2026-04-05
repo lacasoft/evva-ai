@@ -19,6 +19,7 @@ export class ConversationService {
 
   // Cache de sessionId por usuario para agrupar mensajes de la misma sesión
   private readonly activeSessions = new Map<string, string>();
+  private readonly sessionTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private readonly personaService: PersonaService,
@@ -63,14 +64,19 @@ export class ConversationService {
       LIMITS.CONVERSATION_WINDOW,
     );
 
-    // 3. Construir system prompt dinámico con memoria semántica
+    // 3. Construir tools + instrucciones en una sola llamada (1 query a DB/cache)
+    const { tools, promptInstructions } =
+      await this.toolsService.buildToolsAndInstructions(user, assistant);
+
+    // 4. Construir system prompt dinámico con memoria semántica
     const systemPrompt = await this.personaService.buildPromptForMessage({
       user,
       assistant,
       incomingMessage: incomingText,
+      skillInstructions: promptInstructions,
     });
 
-    // 4. Formatear historial para el LLM (excluir el mensaje actual que ya está al final)
+    // 5. Formatear historial para el LLM (excluir el mensaje actual que ya está al final)
     const historyForLLM = history
       .filter((m) => m.id !== userMessage.id)
       .filter((m) => m.role === "user" || m.role === "assistant")
@@ -91,9 +97,6 @@ export class ConversationService {
     } else {
       historyForLLM.push({ role: "user", content: incomingText });
     }
-
-    // 5. Construir tools disponibles para esta sesión
-    const tools = await this.toolsService.buildTools(user, assistant);
 
     // 6. Llamar al LLM
     const llmResponse = await generateResponse({
@@ -148,23 +151,35 @@ export class ConversationService {
 
   private getOrCreateSession(userId: string): string {
     const existing = this.activeSessions.get(userId);
-    if (existing) return existing;
+    if (existing) {
+      // Reset expiry timer on activity
+      this.resetSessionTimer(userId, existing);
+      return existing;
+    }
 
     const newSession = generateSessionId(userId);
     this.activeSessions.set(userId, newSession);
+    this.resetSessionTimer(userId, newSession);
 
-    // Auto-expirar sesión después de 30 minutos de inactividad
-    setTimeout(
+    return newSession;
+  }
+
+  private resetSessionTimer(userId: string, sessionId: string): void {
+    // Clear existing timer to prevent memory leak
+    const existingTimer = this.sessionTimers.get(userId);
+    if (existingTimer) clearTimeout(existingTimer);
+
+    const timer = setTimeout(
       () => {
-        if (this.activeSessions.get(userId) === newSession) {
+        if (this.activeSessions.get(userId) === sessionId) {
           this.activeSessions.delete(userId);
+          this.sessionTimers.delete(userId);
           this.logger.debug(`Session expired for user ${userId}`);
         }
       },
       30 * 60 * 1000,
     );
-
-    return newSession;
+    this.sessionTimers.set(userId, timer);
   }
 
   // Permite forzar una nueva sesión (ej: /reset command)

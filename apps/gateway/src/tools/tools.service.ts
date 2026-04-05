@@ -18,53 +18,32 @@ export class ToolsService {
   ) {}
 
   /**
-   * Builds all tools for a user session using the skill registry.
-   * Only loads tools the user can actually use (OAuth connected, env configured).
-   * Uses Redis cache for connected providers (5 min TTL).
+   * Builds tools AND prompt instructions in a single call.
+   * Queries connected providers only once (cached in Redis).
    */
-  async buildTools(
+  async buildToolsAndInstructions(
     user: User,
     assistant: Assistant,
-  ): Promise<Record<string, Tool>> {
+  ): Promise<{ tools: Record<string, Tool>; promptInstructions: string[] }> {
     const connectedProviders = await this.getConnectedProviders(user.id);
     const ctx: SkillContext = { user, assistant, connectedProviders };
 
     const tools = skillRegistry.buildAllTools(ctx);
+    const promptInstructions = skillRegistry.getPromptInstructions(ctx);
 
     this.logger.debug(
       `Built ${Object.keys(tools).length} tools for user ${user.id} (providers: ${connectedProviders.join(",") || "none"})`,
     );
 
-    return tools;
+    return { tools, promptInstructions };
   }
 
-  /**
-   * Get prompt instructions for a specific user context.
-   */
-  async getPromptInstructions(
-    user: User,
-    assistant: Assistant,
-  ): Promise<string[]> {
-    const connectedProviders = await this.getConnectedProviders(user.id);
-    const ctx: SkillContext = { user, assistant, connectedProviders };
-    return skillRegistry.getPromptInstructions(ctx);
-  }
-
-  /**
-   * Get a summary of all skills and their status.
-   */
   getSkillsSummary() {
     return skillRegistry.getSummary();
   }
 
-  /**
-   * Check which OAuth providers the user has connected.
-   * Cached in Redis for 5 minutes.
-   */
   private async getConnectedProviders(userId: string): Promise<string[]> {
     const cacheKey = `user:${userId}:providers`;
-
-    // Check cache first
     const cached = await this.cache.get<string[]>(cacheKey);
     if (cached) return cached;
 
@@ -74,9 +53,10 @@ export class ToolsService {
         [userId],
       );
       const providers = rows.map((r) => r.provider as string);
-      await this.cache.set(cacheKey, providers, 300); // 5 min
+      await this.cache.set(cacheKey, providers, 300);
       return providers;
-    } catch {
+    } catch (err) {
+      this.logger.error(`Failed to get connected providers: ${err}`);
       return [];
     }
   }

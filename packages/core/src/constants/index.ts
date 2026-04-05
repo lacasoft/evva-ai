@@ -15,7 +15,7 @@ export const BRAND = {
 // ============================================================
 export const LIMITS = {
   // Cuántos mensajes recientes incluir como contexto
-  CONVERSATION_WINDOW: 12,
+  CONVERSATION_WINDOW: 6,
 
   // Cuántos facts recuperar por búsqueda semántica
   MEMORY_RETRIEVAL_TOP_K: 5,

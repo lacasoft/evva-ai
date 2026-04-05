@@ -119,9 +119,7 @@ export class DailyBriefingProcessor implements OnModuleInit {
         );
         return { fact: f.content, daysUntil };
       })
-      .filter(
-        (b): b is NonNullable<typeof b> => b !== null && b.daysUntil <= 7,
-      )
+      .filter((b): b is NonNullable<typeof b> => b !== null && b.daysUntil <= 7)
       .sort((a, b) => a.daysUntil - b.daysUntil);
 
     if (upcomingBirthdays.length > 0) {

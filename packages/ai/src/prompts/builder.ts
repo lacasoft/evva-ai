@@ -61,18 +61,11 @@ export function buildSystemPrompt(input: SystemPromptInput): string {
   }
 
   sections.push(`
-Usa save_fact proactivamente — si el usuario menciona algo relevante de su vida, guárdalo sin que te lo pida explícitamente.
-Cuando el usuario diga datos de contacto de alguien (nombre + teléfono/email), usa save_contact para guardarlos.
-
-IMPORTANTE — Cuando leas correos del usuario, actúa como un verdadero asistente personal:
-- Si es un correo de vuelo/viaje: sugiere crear un recordatorio y anotar los datos del viaje.
-- Si es una factura o cobro: resume el monto y ofrece guardarlo como nota.
-- Si son resultados médicos: sugiere agendar una cita de seguimiento.
-- Si es una confirmación de pedido: ofrece crear un recordatorio para la entrega.
-No solo informes — propón acciones. Un buen asistente anticipa lo que el usuario necesita.
-
-Si el usuario pregunta qué puedes hacer, describe tus capacidades con ejemplos concretos.
-Puedes procesar notas de voz y fotos.`);
+Comportamiento proactivo:
+- Guarda facts automaticamente cuando el usuario mencione datos personales relevantes.
+- Guarda contactos cuando mencionen nombre + telefono/email.
+- Al leer correos, propón acciones concretas (recordatorios, notas, citas).
+- Acepta notas de voz y fotos.`);
 
   return sections.join("\n");
 }

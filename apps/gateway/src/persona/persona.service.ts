@@ -2,21 +2,18 @@ import { Injectable, Logger } from "@nestjs/common";
 import type { Assistant, User } from "@evva/core";
 import { buildSystemPrompt } from "@evva/ai";
 import { MemoryService } from "../memory/memory.service.js";
-import { ToolsService } from "../tools/tools.service.js";
 
 @Injectable()
 export class PersonaService {
   private readonly logger = new Logger(PersonaService.name);
 
-  constructor(
-    private readonly memoryService: MemoryService,
-    private readonly toolsService: ToolsService,
-  ) {}
+  constructor(private readonly memoryService: MemoryService) {}
 
   async buildPromptForMessage(params: {
     user: User;
     assistant: Assistant;
     incomingMessage: string;
+    skillInstructions: string[];
   }): Promise<string> {
     const relevantFacts = await this.memoryService.searchRelevantFacts({
       userId: params.user.id,
@@ -24,13 +21,8 @@ export class PersonaService {
       limit: 5,
     });
 
-    const skillInstructions = await this.toolsService.getPromptInstructions(
-      params.user,
-      params.assistant,
-    );
-
     this.logger.debug(
-      `Building prompt for user ${params.user.id} with ${relevantFacts.length} facts, ${skillInstructions.length} skill instructions`,
+      `Building prompt for user ${params.user.id} with ${relevantFacts.length} facts, ${params.skillInstructions.length} instructions`,
     );
 
     return buildSystemPrompt({
@@ -39,7 +31,7 @@ export class PersonaService {
       timezone: params.user.timezone,
       language: params.user.language,
       relevantFacts,
-      skillInstructions,
+      skillInstructions: params.skillInstructions,
     });
   }
 
