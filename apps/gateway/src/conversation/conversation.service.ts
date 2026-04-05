@@ -93,7 +93,7 @@ export class ConversationService {
     }
 
     // 5. Construir tools disponibles para esta sesión
-    const tools = this.toolsService.buildTools(user, assistant);
+    const tools = await this.toolsService.buildTools(user, assistant);
 
     // 6. Llamar al LLM
     const llmResponse = await generateResponse({

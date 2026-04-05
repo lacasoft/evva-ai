@@ -1,6 +1,10 @@
-# Evva
+<p align="center">
+  <img src="assets/evva-logo.png" alt="Evva" width="200" />
+</p>
 
-Asistente personal con IA, memoria real y acciones proactivas. Vive en Telegram.
+<h1 align="center">Evva</h1>
+
+<p align="center"><strong>Asistente personal con IA, memoria real y acciones proactivas. Vive en Telegram y WhatsApp.</strong></p>
 
 > :globe_with_meridians: [Read in English](README.md)
 
@@ -29,8 +33,14 @@ Asistente personal con IA, memoria real y acciones proactivas. Vive en Telegram.
 - **Tipo de cambio** — Conversion de divisas en tiempo real.
 - **Dictado inteligente** — Genera mensajes formales o informales a pedido.
 - **Resumen de noticias** — Busca y resume noticias actuales.
+- **Spotify** — Ve que esta sonando, historial, top tracks, busca musica.
+- **WhatsApp** — El mismo asistente disponible en WhatsApp Business API.
+- **Cumpleanos automaticos** — Detecta y recuerda cumpleanos proactivamente.
+- **Recetas inteligentes** — Sugiere recetas basadas en tu lista del super.
+- **Cache Redis** — Optimiza tokens cacheando contexto OAuth y providers.
 - **Modelo LLM configurable** — Haiku para desarrollo, Sonnet para produccion.
 - **Rebrandeable** — Cambia el nombre del sistema con `APP_BRAND_NAME` en el `.env`.
+- **Multi-canal** — Telegram + WhatsApp con experiencia identica.
 
 ---
 

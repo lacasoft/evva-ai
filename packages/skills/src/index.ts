@@ -18,6 +18,9 @@ export { emergencySkill } from "./emergency/index.js";
 export { calendarSkill } from "./calendar/index.js";
 export { gmailSkill } from "./gmail/index.js";
 
+// Music
+export { spotifySkill } from "./spotify/index.js";
+
 // Utility
 export { weatherSkill } from "./weather/index.js";
 export { newsSkill } from "./news/index.js";
@@ -53,6 +56,7 @@ import { visionSkill } from "./vision/index.js";
 import { searchSkill } from "./search/index.js";
 import { birthdaysSkill } from "./birthdays/index.js";
 import { recipesSkill } from "./recipes/index.js";
+import { spotifySkill } from "./spotify/index.js";
 
 skillRegistry.register(memorySkill);
 skillRegistry.register(notesSkill);
@@ -74,3 +78,4 @@ skillRegistry.register(visionSkill);
 skillRegistry.register(searchSkill);
 skillRegistry.register(birthdaysSkill);
 skillRegistry.register(recipesSkill);
+skillRegistry.register(spotifySkill);
