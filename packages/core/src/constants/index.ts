@@ -51,10 +51,10 @@ export const ONBOARDING_MESSAGES = {
     `Hola ${firstName}, soy tu nuevo asistente personal. Voy a hacerte unas preguntas rápidas para conocerte mejor.\n\nPrimero, ¿cómo quieres que me llame?`,
 
   ASK_USER_NAME: (assistantName: string) =>
-    `Perfecto, seré ${assistantName}. ¿Y cómo te llamas tú? (tu nombre real, para dirigirme a ti)`,
+    `Perfecto, seré ${assistantName}. ¿Y cómo te llamas tú? (tu nombre real, para dirigirme a ti)\n\n(Escribe "volver" si quieres cambiar mi nombre)`,
 
   ASK_AGE_RANGE: (userName: string) =>
-    `Mucho gusto, ${userName}. Para mostrarte las funciones más útiles, ¿en qué rango de edad estás?\n\n1. Joven (18-30)\n2. Adulto (31-55)\n3. Adulto mayor (56+)\n\nResponde con el número o la palabra.`,
+    `Mucho gusto, ${userName}. Para mostrarte las funciones más útiles, ¿en qué rango de edad estás?\n\n1. Joven (18-30)\n2. Adulto (31-55)\n3. Adulto mayor (56+)\n\nResponde con el número. Escribe "volver" para corregir tu nombre.`,
 
   ASK_INTERESTS_YOUNG: (assistantName: string) =>
     `Genial. Como ${assistantName}, puedo ayudarte con muchas cosas. ¿Cuáles te interesan más?\n\n` +

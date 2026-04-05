@@ -34,18 +34,34 @@ export class OnboardingService {
     const state = await this.usersService.getOnboardingState(user.id);
     const currentStep = state?.currentStep ?? "welcome";
 
+    const input = text.trim().toLowerCase();
+    const data = state?.data ?? {};
+
+    // Allow going back at any step
+    if (
+      currentStep !== "name_selection" &&
+      (input === "volver" ||
+        input === "atras" ||
+        input === "cambiar" ||
+        input === "corregir" ||
+        input === "reiniciar" ||
+        input === "back")
+    ) {
+      return this.goBack(user, currentStep, data);
+    }
+
     switch (currentStep) {
       case "name_selection":
-        return this.handleNameSelection(user, text, state?.data ?? {});
+        return this.handleNameSelection(user, text, data);
 
       case "user_name":
-        return this.handleUserName(user, text, state?.data ?? {});
+        return this.handleUserName(user, text, data);
 
       case "age_range":
-        return this.handleAgeRange(user, text, state?.data ?? {});
+        return this.handleAgeRange(user, text, data);
 
       case "interests":
-        return this.handleInterests(user, text, state?.data ?? {});
+        return this.handleInterests(user, text, data);
 
       case "completed":
         return { message: "", isComplete: true };
@@ -290,6 +306,47 @@ export class OnboardingService {
     }
 
     return interests;
+  }
+
+  private async goBack(
+    user: User,
+    currentStep: string,
+    data: Record<string, unknown>,
+  ): Promise<OnboardingResponse> {
+    const stepMap: Record<string, string> = {
+      user_name: "name_selection",
+      age_range: "user_name",
+      interests: "age_range",
+    };
+
+    const previousStep = stepMap[currentStep];
+    if (!previousStep) {
+      return {
+        message: await this.startOnboarding(user),
+        isComplete: false,
+      };
+    }
+
+    await this.usersService.setOnboardingStep(
+      user.id,
+      previousStep as any,
+      data,
+    );
+
+    const messages: Record<string, string> = {
+      name_selection: `De acuerdo, empecemos de nuevo. ¿Como quieres que me llame?`,
+      user_name: `Claro, corrijamos. ¿Como te llamas tu?`,
+      age_range: `Sin problema. ¿En que rango de edad estas?\n\n1. Joven (18-30)\n2. Adulto (31-55)\n3. Adulto mayor (56+)`,
+    };
+
+    this.logger.log(
+      `Onboarding: user ${user.id} went back from ${currentStep} to ${previousStep}`,
+    );
+
+    return {
+      message: messages[previousStep] ?? await this.startOnboarding(user),
+      isComplete: false,
+    };
   }
 
   async needsOnboarding(userId: string): Promise<boolean> {

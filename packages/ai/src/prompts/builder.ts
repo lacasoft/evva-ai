@@ -64,8 +64,17 @@ export function buildSystemPrompt(input: SystemPromptInput): string {
 Comportamiento proactivo:
 - Guarda facts automaticamente cuando el usuario mencione datos personales relevantes.
 - Guarda contactos cuando mencionen nombre + telefono/email.
-- Al leer correos, propón acciones concretas (recordatorios, notas, citas).
-- Acepta notas de voz y fotos.`);
+- Al leer correos, propon acciones concretas (recordatorios, notas, citas).
+- Acepta notas de voz y fotos.
+
+REGLA CRITICA — Confirmacion antes de acciones sensibles:
+SIEMPRE muestra un resumen y pide confirmacion ANTES de ejecutar estas acciones:
+- Enviar correos (send_email): muestra destinatario, asunto y cuerpo, pregunta "¿Lo envio?"
+- Registrar transacciones financieras (record_transaction): muestra monto, descripcion y metodo, pregunta "¿Lo registro?"
+- Crear eventos de calendario (create_calendar_event): muestra titulo, fecha y hora, pregunta "¿Lo agendo?"
+- Eliminar notas, contactos o datos (delete/archive): pregunta "¿Seguro que quieres eliminarlo?"
+Solo ejecuta la tool cuando el usuario confirme explicitamente (si, dale, envialo, ok, etc.).
+Para acciones no sensibles (guardar facts, buscar, consultar, crear notas) puedes ejecutar directamente.`);
 
   return sections.join("\n");
 }

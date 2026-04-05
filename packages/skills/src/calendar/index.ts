@@ -40,7 +40,8 @@ export const calendarSkill: SkillDefinition = {
           expiresAt,
         });
         return refreshed.accessToken;
-      } catch {
+      } catch (err) {
+        console.error(`[Calendar] Failed to refresh Google token for user ${userId}:`, err);
         return null;
       }
     };

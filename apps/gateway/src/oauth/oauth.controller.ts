@@ -2,10 +2,13 @@ import { Controller, Get, Query, Res, Logger } from "@nestjs/common";
 import type { Response } from "express";
 import { exchangeGoogleCode, exchangeSpotifyCode } from "@evva/ai";
 import { upsertOAuthToken } from "@evva/database";
+import { CacheService } from "../cache/cache.service.js";
 
 @Controller("oauth")
 export class OAuthController {
   private readonly logger = new Logger(OAuthController.name);
+
+  constructor(private readonly cache: CacheService) {}
 
   /**
    * Google OAuth callback.
@@ -48,6 +51,9 @@ export class OAuthController {
         scope: tokens.scope,
         expiresAt,
       });
+
+      // Invalidate provider cache so tools are available immediately
+      await this.cache.del(`user:${userId}:providers`);
 
       this.logger.log(`Google OAuth completed for user ${userId}`);
 
@@ -106,6 +112,8 @@ export class OAuthController {
         refreshToken: tokens.refreshToken,
         expiresAt,
       });
+
+      await this.cache.del(`user:${userId}:providers`);
 
       this.logger.log(`Spotify OAuth completed for user ${userId}`);
 
