@@ -103,11 +103,24 @@ For detailed step-by-step instructions, see [`docs/SETUP.md`](docs/SETUP.md).
 - PostgreSQL with pgvector extension
 - Redis
 
-### Install and run
+### Option A -- Docker Compose (recommended)
 
 ```bash
-git clone https://github.com/anthropic-ai/evva.git
-cd evva
+git clone https://github.com/lacasoft/evva-ai.git
+cd evva-ai
+cp .env.example .env
+# Edit .env with your credentials (see .env.example for all variables)
+
+docker compose up
+```
+
+That's it. PostgreSQL, Redis, migrations, gateway, and worker all start automatically.
+
+### Option B -- Manual setup
+
+```bash
+git clone https://github.com/lacasoft/evva-ai.git
+cd evva-ai
 pnpm install
 cp .env.example .env
 # Edit .env with your credentials

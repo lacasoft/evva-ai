@@ -1,0 +1,85 @@
+services:
+  # PostgreSQL with pgvector
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: evva
+      POSTGRES_PASSWORD: evva
+      POSTGRES_DB: evva
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evva"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for BullMQ
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass evva
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "evva", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Run migrations
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: node packages/database/dist/migrations/run.js
+    environment:
+      DATABASE_URL: postgresql://evva:evva@postgres:5432/evva
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Gateway — Telegram bot + API
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: gateway
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://evva:evva@postgres:5432/evva
+      REDIS_URL: redis://:evva@redis:6379/0
+      PORT: 3000
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Worker — BullMQ processors
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://evva:evva@postgres:5432/evva
+      REDIS_URL: redis://:evva@redis:6379/0
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: evva
+          POSTGRES_PASSWORD: evva
+          POSTGRES_DB: evva_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U evva"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Lint check
+        run: pnpm format:check
+        continue-on-error: true
+
+      - name: Run tests
+        run: npx vitest run
+
+      - name: Type check
+        run: pnpm --filter @evva/core typecheck && pnpm --filter @evva/database typecheck && pnpm --filter @evva/ai typecheck
