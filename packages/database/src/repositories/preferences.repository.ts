@@ -1,9 +1,11 @@
-import type { UserPreferences } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { UserPreferences } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
-export async function getPreferences(userId: string): Promise<UserPreferences | null> {
+export async function getPreferences(
+  userId: string,
+): Promise<UserPreferences | null> {
   const row = await queryOne(
-    'SELECT * FROM user_preferences WHERE user_id = $1',
+    "SELECT * FROM user_preferences WHERE user_id = $1",
     [userId],
   );
 
@@ -13,7 +15,12 @@ export async function getPreferences(userId: string): Promise<UserPreferences | 
 
 export async function upsertPreferences(
   userId: string,
-  updates: Partial<Pick<UserPreferences, 'dailyBriefingEnabled' | 'dailyBriefingHour' | 'dailyBriefingMinute'>>,
+  updates: Partial<
+    Pick<
+      UserPreferences,
+      "dailyBriefingEnabled" | "dailyBriefingHour" | "dailyBriefingMinute"
+    >
+  >,
 ): Promise<UserPreferences> {
   const row = await queryOne(
     `INSERT INTO user_preferences (user_id, daily_briefing_enabled, daily_briefing_hour, daily_briefing_minute, updated_at)
@@ -32,18 +39,23 @@ export async function upsertPreferences(
     ],
   );
 
-  if (!row) throw new Error('Failed to upsert preferences');
+  if (!row) throw new Error("Failed to upsert preferences");
   return mapToPreferences(row);
 }
 
-export async function getUsersWithBriefingAt(hour: number, minute: number): Promise<Array<{
-  userId: string;
-  telegramId: number;
-  timezone: string;
-  language: 'es' | 'en';
-  telegramFirstName?: string;
-  assistantName: string;
-}>> {
+export async function getUsersWithBriefingAt(
+  hour: number,
+  minute: number,
+): Promise<
+  Array<{
+    userId: string;
+    telegramId: number;
+    timezone: string;
+    language: "es" | "en";
+    telegramFirstName?: string;
+    assistantName: string;
+  }>
+> {
   const rows = await query(
     `SELECT u.id as user_id, u.telegram_id, u.timezone, u.language, u.telegram_first_name,
             ac.name as assistant_name
@@ -57,11 +69,11 @@ export async function getUsersWithBriefingAt(hour: number, minute: number): Prom
     [hour, minute],
   );
 
-  return rows.map(r => ({
+  return rows.map((r) => ({
     userId: r.user_id as string,
     telegramId: Number(r.telegram_id),
     timezone: r.timezone as string,
-    language: r.language as 'es' | 'en',
+    language: r.language as "es" | "en",
     telegramFirstName: r.telegram_first_name as string | undefined,
     assistantName: r.assistant_name as string,
   }));

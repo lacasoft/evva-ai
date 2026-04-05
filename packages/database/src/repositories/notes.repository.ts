@@ -1,6 +1,6 @@
-import type { Note, NoteItem } from '@evva/core';
-import { generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { Note, NoteItem } from "@evva/core";
+import { generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 export async function createNote(params: {
   userId: string;
@@ -19,28 +19,34 @@ export async function createNote(params: {
       id,
       params.userId,
       params.title,
-      params.content ?? '',
+      params.content ?? "",
       params.isList ?? false,
       JSON.stringify(params.items ?? []),
     ],
   );
 
-  if (!row) throw new Error('Failed to create note');
+  if (!row) throw new Error("Failed to create note");
   return mapToNote(row);
 }
 
-export async function getUserNotes(userId: string, includeArchived = false): Promise<Note[]> {
+export async function getUserNotes(
+  userId: string,
+  includeArchived = false,
+): Promise<Note[]> {
   const sql = includeArchived
-    ? 'SELECT * FROM notes WHERE user_id = $1 ORDER BY is_pinned DESC, updated_at DESC'
-    : 'SELECT * FROM notes WHERE user_id = $1 AND is_archived = false ORDER BY is_pinned DESC, updated_at DESC';
+    ? "SELECT * FROM notes WHERE user_id = $1 ORDER BY is_pinned DESC, updated_at DESC"
+    : "SELECT * FROM notes WHERE user_id = $1 AND is_archived = false ORDER BY is_pinned DESC, updated_at DESC";
 
   const rows = await query(sql, [userId]);
   return rows.map(mapToNote);
 }
 
-export async function getNoteById(id: string, userId: string): Promise<Note | null> {
+export async function getNoteById(
+  id: string,
+  userId: string,
+): Promise<Note | null> {
   const row = await queryOne(
-    'SELECT * FROM notes WHERE id = $1 AND user_id = $2',
+    "SELECT * FROM notes WHERE id = $1 AND user_id = $2",
     [id, userId],
   );
 
@@ -48,9 +54,12 @@ export async function getNoteById(id: string, userId: string): Promise<Note | nu
   return mapToNote(row);
 }
 
-export async function findNoteByTitle(userId: string, title: string): Promise<Note | null> {
+export async function findNoteByTitle(
+  userId: string,
+  title: string,
+): Promise<Note | null> {
   const row = await queryOne(
-    'SELECT * FROM notes WHERE user_id = $1 AND LOWER(title) = LOWER($2) AND is_archived = false',
+    "SELECT * FROM notes WHERE user_id = $1 AND LOWER(title) = LOWER($2) AND is_archived = false",
     [userId, title],
   );
 
@@ -61,9 +70,11 @@ export async function findNoteByTitle(userId: string, title: string): Promise<No
 export async function updateNote(
   id: string,
   userId: string,
-  updates: Partial<Pick<Note, 'title' | 'content' | 'items' | 'isPinned' | 'isArchived'>>,
+  updates: Partial<
+    Pick<Note, "title" | "content" | "items" | "isPinned" | "isArchived">
+  >,
 ): Promise<void> {
-  const setClauses: string[] = ['updated_at = NOW()'];
+  const setClauses: string[] = ["updated_at = NOW()"];
   const values: unknown[] = [];
   let paramIndex = 1;
 
@@ -91,19 +102,20 @@ export async function updateNote(
   values.push(id, userId);
 
   await query(
-    `UPDATE notes SET ${setClauses.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
+    `UPDATE notes SET ${setClauses.join(", ")} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
     values,
   );
 }
 
 export async function deleteNote(id: string, userId: string): Promise<void> {
-  await query('DELETE FROM notes WHERE id = $1 AND user_id = $2', [id, userId]);
+  await query("DELETE FROM notes WHERE id = $1 AND user_id = $2", [id, userId]);
 }
 
 function mapToNote(data: Record<string, unknown>): Note {
-  const items = typeof data.items === 'string'
-    ? JSON.parse(data.items as string)
-    : (data.items ?? []);
+  const items =
+    typeof data.items === "string"
+      ? JSON.parse(data.items as string)
+      : (data.items ?? []);
 
   return {
     id: data.id as string,

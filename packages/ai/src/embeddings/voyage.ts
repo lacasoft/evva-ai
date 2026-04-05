@@ -3,8 +3,8 @@
 // API Docs: https://docs.voyageai.com/reference/embeddings-api
 // ============================================================
 
-const VOYAGE_API_URL = 'https://api.voyageai.com/v1/embeddings';
-const VOYAGE_MODEL = 'voyage-3-lite'; // Mejor balance calidad/costo para fase 1
+const VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings";
+const VOYAGE_MODEL = "voyage-3-lite"; // Mejor balance calidad/costo para fase 1
 const EMBEDDING_DIMS = 512; // voyage-3-lite produce 512 dimensiones
 
 export { EMBEDDING_DIMS };
@@ -21,19 +21,19 @@ export interface EmbeddingResult {
 export async function embedText(text: string): Promise<EmbeddingResult> {
   const apiKey = process.env.VOYAGE_API_KEY;
   if (!apiKey) {
-    throw new Error('Missing VOYAGE_API_KEY environment variable.');
+    throw new Error("Missing VOYAGE_API_KEY environment variable.");
   }
 
   const response = await fetch(VOYAGE_API_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       input: [text],
       model: VOYAGE_MODEL,
-      input_type: 'document',
+      input_type: "document",
     }),
   });
 
@@ -60,25 +60,27 @@ export async function embedText(text: string): Promise<EmbeddingResult> {
 export async function embedQuery(query: string): Promise<EmbeddingResult> {
   const apiKey = process.env.VOYAGE_API_KEY;
   if (!apiKey) {
-    throw new Error('Missing VOYAGE_API_KEY environment variable.');
+    throw new Error("Missing VOYAGE_API_KEY environment variable.");
   }
 
   const response = await fetch(VOYAGE_API_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       input: [query],
       model: VOYAGE_MODEL,
-      input_type: 'query', // Diferente para búsquedas vs documentos
+      input_type: "query", // Diferente para búsquedas vs documentos
     }),
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Voyage AI query embedding failed: ${response.status} ${error}`);
+    throw new Error(
+      `Voyage AI query embedding failed: ${response.status} ${error}`,
+    );
   }
 
   const data = (await response.json()) as {
@@ -99,7 +101,7 @@ export async function embedQuery(query: string): Promise<EmbeddingResult> {
 export async function embedBatch(texts: string[]): Promise<EmbeddingResult[]> {
   const apiKey = process.env.VOYAGE_API_KEY;
   if (!apiKey) {
-    throw new Error('Missing VOYAGE_API_KEY environment variable.');
+    throw new Error("Missing VOYAGE_API_KEY environment variable.");
   }
 
   // Voyage permite hasta 128 textos por request
@@ -110,21 +112,23 @@ export async function embedBatch(texts: string[]): Promise<EmbeddingResult[]> {
     const batch = texts.slice(i, i + BATCH_SIZE);
 
     const response = await fetch(VOYAGE_API_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         input: batch,
         model: VOYAGE_MODEL,
-        input_type: 'document',
+        input_type: "document",
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`Voyage AI batch embedding failed: ${response.status} ${error}`);
+      throw new Error(
+        `Voyage AI batch embedding failed: ${response.status} ${error}`,
+      );
     }
 
     const data = (await response.json()) as {
@@ -153,7 +157,9 @@ export async function embedBatch(texts: string[]): Promise<EmbeddingResult[]> {
 
 export function cosineSimilarity(a: number[], b: number[]): number {
   if (a.length !== b.length) {
-    throw new Error(`Embedding dimensions mismatch: ${a.length} vs ${b.length}`);
+    throw new Error(
+      `Embedding dimensions mismatch: ${a.length} vs ${b.length}`,
+    );
   }
 
   let dotProduct = 0;

@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { Assistant, User } from '@evva/core';
-import { buildSystemPrompt } from '@evva/ai';
-import { MemoryService } from '../memory/memory.service.js';
+import { Injectable, Logger } from "@nestjs/common";
+import type { Assistant, User } from "@evva/core";
+import { buildSystemPrompt } from "@evva/ai";
+import { skillRegistry } from "@evva/skills";
+import { MemoryService } from "../memory/memory.service.js";
 
 @Injectable()
 export class PersonaService {
@@ -35,6 +36,7 @@ export class PersonaService {
       timezone: params.user.timezone,
       language: params.user.language,
       relevantFacts,
+      skillInstructions: skillRegistry.getPromptInstructions(),
     });
   }
 

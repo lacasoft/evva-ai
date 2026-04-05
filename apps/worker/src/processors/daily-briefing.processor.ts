@@ -1,7 +1,11 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { getUsersWithBriefingAt, getUserNotes, getAllUserFacts } from '@evva/database';
-import { generateResponse } from '@evva/ai';
-import { TelegramSenderService } from '../handlers/telegram-sender.service.js';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import {
+  getUsersWithBriefingAt,
+  getUserNotes,
+  getAllUserFacts,
+} from "@evva/database";
+import { generateResponse } from "@evva/ai";
+import { TelegramSenderService } from "../handlers/telegram-sender.service.js";
 
 @Injectable()
 export class DailyBriefingProcessor implements OnModuleInit {
@@ -13,12 +17,12 @@ export class DailyBriefingProcessor implements OnModuleInit {
   onModuleInit() {
     // Revisar cada minuto si hay briefings que enviar
     this.intervalId = setInterval(() => {
-      this.checkAndSendBriefings().catch(err => {
+      this.checkAndSendBriefings().catch((err) => {
         this.logger.error(`Briefing check failed: ${err}`);
       });
     }, 60_000);
 
-    this.logger.log('DailyBriefingProcessor iniciado — revisando cada minuto');
+    this.logger.log("DailyBriefingProcessor iniciado — revisando cada minuto");
   }
 
   private async checkAndSendBriefings(): Promise<void> {
@@ -48,7 +52,7 @@ export class DailyBriefingProcessor implements OnModuleInit {
     userId: string;
     telegramId: number;
     timezone: string;
-    language: 'es' | 'en';
+    language: "es" | "en";
     telegramFirstName?: string;
     assistantName: string;
   }): Promise<void> {
@@ -58,16 +62,23 @@ export class DailyBriefingProcessor implements OnModuleInit {
       getAllUserFacts(user.userId),
     ]);
 
-    const activeNotes = notes.filter(n => !n.isArchived);
-    const pinnedNotes = activeNotes.filter(n => n.isPinned);
-    const lists = activeNotes.filter(n => n.isList);
-    const uncheckedItems = lists.flatMap(n =>
-      (n.items ?? []).filter(i => !i.checked).map(i => `${n.title}: ${i.text}`),
+    const activeNotes = notes.filter((n) => !n.isArchived);
+    const pinnedNotes = activeNotes.filter((n) => n.isPinned);
+    const lists = activeNotes.filter((n) => n.isList);
+    const uncheckedItems = lists.flatMap((n) =>
+      (n.items ?? [])
+        .filter((i) => !i.checked)
+        .map((i) => `${n.title}: ${i.text}`),
     );
 
     const now = new Date().toLocaleString(
-      user.language === 'es' ? 'es-MX' : 'en-US',
-      { timeZone: user.timezone, weekday: 'long', month: 'long', day: 'numeric' },
+      user.language === "es" ? "es-MX" : "en-US",
+      {
+        timeZone: user.timezone,
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      },
     );
 
     // Construir prompt para el briefing
@@ -77,8 +88,10 @@ export class DailyBriefingProcessor implements OnModuleInit {
       contextParts.push(`Notas activas (${activeNotes.length}):`);
       for (const note of activeNotes.slice(0, 10)) {
         if (note.isList) {
-          const pending = (note.items ?? []).filter(i => !i.checked);
-          contextParts.push(`- Lista "${note.title}": ${pending.length} items pendientes`);
+          const pending = (note.items ?? []).filter((i) => !i.checked);
+          contextParts.push(
+            `- Lista "${note.title}": ${pending.length} items pendientes`,
+          );
         } else {
           contextParts.push(`- Nota "${note.title}"`);
         }
@@ -86,17 +99,19 @@ export class DailyBriefingProcessor implements OnModuleInit {
     }
 
     if (facts.length > 0) {
-      contextParts.push(`\nDatos que recuerdas del usuario (${facts.length} facts):`);
+      contextParts.push(
+        `\nDatos que recuerdas del usuario (${facts.length} facts):`,
+      );
       for (const fact of facts.slice(0, 5)) {
         contextParts.push(`- ${fact.content}`);
       }
     }
 
-    const systemPrompt = `Eres ${user.assistantName}, el asistente personal de ${user.telegramFirstName ?? 'tu usuario'}.
+    const systemPrompt = `Eres ${user.assistantName}, el asistente personal de ${user.telegramFirstName ?? "tu usuario"}.
 Es ${now}. Envía el resumen diario matutino.
 
 Contexto actual del usuario:
-${contextParts.length > 0 ? contextParts.join('\n') : 'No hay notas ni pendientes guardados.'}
+${contextParts.length > 0 ? contextParts.join("\n") : "No hay notas ni pendientes guardados."}
 
 Instrucciones:
 - Saluda brevemente y da el resumen del día
@@ -108,7 +123,7 @@ Instrucciones:
 
     const response = await generateResponse({
       systemPrompt,
-      messages: [{ role: 'user', content: 'Genera el resumen diario.' }],
+      messages: [{ role: "user", content: "Genera el resumen diario." }],
       maxTokens: 512,
       temperature: 0.7,
     });
@@ -120,6 +135,8 @@ Instrucciones:
     }
 
     await this.telegramSender.send(user.telegramId, message);
-    this.logger.log(`Daily briefing sent to ${user.telegramFirstName ?? user.userId}`);
+    this.logger.log(
+      `Daily briefing sent to ${user.telegramFirstName ?? user.userId}`,
+    );
   }
 }

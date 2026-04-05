@@ -167,8 +167,71 @@ evva/
 └── packages/
     ├── core/             # Tipos, constantes y utils compartidos
     ├── database/         # Cliente PostgreSQL (pg) y repositories
-    └── ai/               # LLM (Claude), embeddings (Voyage), prompts
+    ├── ai/               # LLM (Claude), embeddings (Voyage), prompts
+    └── skills/           # Skills modulares (18 plugins)
+        └── src/
+            ├── registry.ts        # Registro central de skills
+            ├── base-skill.ts      # Interfaz SkillDefinition
+            ├── memory/            # Memoria semantica persistente
+            ├── notes/             # Notas y listas
+            ├── contacts/          # Gestion de contactos
+            ├── reminders/         # Recordatorios programados
+            ├── finance/           # Finanzas personales
+            ├── health/            # Medicamentos y habitos
+            ├── emergency/         # Contactos de emergencia
+            ├── calendar/          # Google Calendar
+            ├── gmail/             # Gmail (leer, buscar, enviar)
+            ├── weather/           # Clima
+            ├── search/            # Busqueda web (Brave)
+            ├── news/              # Resumen de noticias
+            ├── translator/        # Traduccion
+            ├── exchange/          # Tipo de cambio
+            ├── dictation/         # Dictado inteligente
+            ├── briefing/          # Resumen diario proactivo
+            ├── voice/             # Transcripcion de voz
+            └── vision/            # Analisis de fotos y documentos
 ```
+
+## Agregar un nuevo skill
+
+Cada skill es un modulo independiente. Para agregar uno nuevo:
+
+```typescript
+// packages/skills/src/mi-skill/index.ts
+import { tool } from 'ai';
+import { z } from 'zod';
+import type { SkillDefinition } from '../base-skill.js';
+
+export const miSkill: SkillDefinition = {
+  name: 'mi-skill',
+  description: 'Lo que hace este skill',
+  category: 'utility',
+  forProfiles: ['young', 'adult', 'senior'],
+
+  buildTools: (ctx) => ({
+    mi_tool: tool({
+      description: 'Descripcion para el LLM',
+      parameters: z.object({ input: z.string() }),
+      execute: async ({ input }) => {
+        return { success: true, result: input };
+      },
+    }),
+  }),
+
+  promptInstructions: [
+    '- mi_tool: Descripcion de lo que hace esta tool',
+  ],
+};
+```
+
+Luego registralo en `packages/skills/src/index.ts`:
+```typescript
+export { miSkill } from './mi-skill/index.js';
+import { miSkill } from './mi-skill/index.js';
+skillRegistry.register(miSkill);
+```
+
+El skill queda disponible automaticamente para el LLM. No hay que modificar ningun otro archivo.
 
 ---
 

@@ -6,7 +6,8 @@
     "paths": {
       "@evva/core": ["../../packages/core/src/index.ts"],
       "@evva/database": ["../../packages/database/src/index.ts"],
-      "@evva/ai": ["../../packages/ai/src/index.ts"]
+      "@evva/ai": ["../../packages/ai/src/index.ts"],
+      "@evva/skills": ["../../packages/skills/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

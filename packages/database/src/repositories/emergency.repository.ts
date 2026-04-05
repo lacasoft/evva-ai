@@ -1,6 +1,6 @@
-import type { EmergencyContact } from '@evva/core';
-import { generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { EmergencyContact } from "@evva/core";
+import { generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 export async function createEmergencyContact(params: {
   userId: string;
@@ -25,26 +25,33 @@ export async function createEmergencyContact(params: {
     ],
   );
 
-  if (!row) throw new Error('Failed to create emergency contact');
+  if (!row) throw new Error("Failed to create emergency contact");
   return mapToEmergencyContact(row);
 }
 
-export async function getUserEmergencyContacts(userId: string): Promise<EmergencyContact[]> {
+export async function getUserEmergencyContacts(
+  userId: string,
+): Promise<EmergencyContact[]> {
   const rows = await query(
-    'SELECT * FROM emergency_contacts WHERE user_id = $1 ORDER BY is_primary DESC, name',
+    "SELECT * FROM emergency_contacts WHERE user_id = $1 ORDER BY is_primary DESC, name",
     [userId],
   );
   return rows.map(mapToEmergencyContact);
 }
 
-export async function deleteEmergencyContact(id: string, userId: string): Promise<void> {
-  await query(
-    'DELETE FROM emergency_contacts WHERE id = $1 AND user_id = $2',
-    [id, userId],
-  );
+export async function deleteEmergencyContact(
+  id: string,
+  userId: string,
+): Promise<void> {
+  await query("DELETE FROM emergency_contacts WHERE id = $1 AND user_id = $2", [
+    id,
+    userId,
+  ]);
 }
 
-function mapToEmergencyContact(data: Record<string, unknown>): EmergencyContact {
+function mapToEmergencyContact(
+  data: Record<string, unknown>,
+): EmergencyContact {
   return {
     id: data.id as string,
     userId: data.user_id as string,

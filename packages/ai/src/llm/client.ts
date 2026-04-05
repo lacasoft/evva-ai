@@ -1,6 +1,6 @@
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { generateText, streamText, type CoreMessage, type Tool } from 'ai';
-import { LIMITS } from '@evva/core';
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText, streamText, type CoreMessage, type Tool } from "ai";
+import { LIMITS } from "@evva/core";
 
 // ============================================================
 // Cliente Anthropic
@@ -9,7 +9,7 @@ import { LIMITS } from '@evva/core';
 function getAnthropicClient() {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    throw new Error('Missing ANTHROPIC_API_KEY environment variable.');
+    throw new Error("Missing ANTHROPIC_API_KEY environment variable.");
   }
   return createAnthropic({ apiKey });
 }
@@ -44,7 +44,7 @@ export interface ToolCallResult {
 }
 
 export interface StreamChunk {
-  type: 'text' | 'tool_call' | 'finish';
+  type: "text" | "tool_call" | "finish";
   content?: string;
   toolCall?: ToolCallResult;
 }
@@ -53,11 +53,13 @@ export interface StreamChunk {
 // generateResponse — para mensajes que requieren respuesta completa
 // ============================================================
 
-export async function generateResponse(request: LLMRequest): Promise<LLMResponse> {
+export async function generateResponse(
+  request: LLMRequest,
+): Promise<LLMResponse> {
   const anthropic = getAnthropicClient();
 
   const result = await generateText({
-    model: anthropic(process.env.LLM_MODEL ?? 'claude-haiku-4-5-20251001'),
+    model: anthropic(process.env.LLM_MODEL ?? "claude-haiku-4-5-20251001"),
     system: request.systemPrompt,
     messages: request.messages,
     tools: request.tools,
@@ -68,10 +70,11 @@ export async function generateResponse(request: LLMRequest): Promise<LLMResponse
     abortSignal: AbortSignal.timeout(LIMITS.LLM_TIMEOUT_MS),
   });
 
-  const toolCalls: ToolCallResult[] = result.toolCalls?.map((tc) => ({
-    toolName: tc.toolName,
-    args: tc.args as Record<string, unknown>,
-  })) ?? [];
+  const toolCalls: ToolCallResult[] =
+    result.toolCalls?.map((tc) => ({
+      toolName: tc.toolName,
+      args: tc.args as Record<string, unknown>,
+    })) ?? [];
 
   return {
     text: result.text,
@@ -95,7 +98,7 @@ export async function* streamResponse(
   const anthropic = getAnthropicClient();
 
   const result = streamText({
-    model: anthropic(process.env.LLM_MODEL ?? 'claude-haiku-4-5-20251001'),
+    model: anthropic(process.env.LLM_MODEL ?? "claude-haiku-4-5-20251001"),
     system: request.systemPrompt,
     messages: request.messages,
     tools: request.tools,
@@ -106,7 +109,7 @@ export async function* streamResponse(
   });
 
   for await (const chunk of result.textStream) {
-    yield { type: 'text', content: chunk };
+    yield { type: "text", content: chunk };
   }
 
   const finalResult = await result;
@@ -115,7 +118,7 @@ export async function* streamResponse(
   if (toolCalls && toolCalls.length > 0) {
     for (const tc of toolCalls) {
       yield {
-        type: 'tool_call',
+        type: "tool_call",
         toolCall: {
           toolName: tc.toolName,
           args: tc.args as Record<string, unknown>,
@@ -124,7 +127,7 @@ export async function* streamResponse(
     }
   }
 
-  yield { type: 'finish' };
+  yield { type: "finish" };
 }
 
 // ============================================================
@@ -133,11 +136,11 @@ export async function* streamResponse(
 
 export const MODELS = {
   // Para desarrollo — económico y rápido
-  DEFAULT: 'claude-haiku-4-5-20251001',
+  DEFAULT: "claude-haiku-4-5-20251001",
   // Para conversación general — balance costo/capacidad
-  SMART: 'claude-sonnet-4-5',
+  SMART: "claude-sonnet-4-5",
   // Para tareas simples y rápidas
-  FAST: 'claude-haiku-4-5-20251001',
+  FAST: "claude-haiku-4-5-20251001",
 } as const;
 
 export type ModelId = (typeof MODELS)[keyof typeof MODELS];

@@ -1,5 +1,5 @@
-import { generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import { generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 export interface OAuthToken {
   id: string;
@@ -14,9 +14,12 @@ export interface OAuthToken {
   updatedAt: Date;
 }
 
-export async function getOAuthToken(userId: string, provider: string): Promise<OAuthToken | null> {
+export async function getOAuthToken(
+  userId: string,
+  provider: string,
+): Promise<OAuthToken | null> {
   const row = await queryOne(
-    'SELECT * FROM oauth_tokens WHERE user_id = $1 AND provider = $2',
+    "SELECT * FROM oauth_tokens WHERE user_id = $1 AND provider = $2",
     [userId, provider],
   );
 
@@ -55,12 +58,18 @@ export async function upsertOAuthToken(params: {
     ],
   );
 
-  if (!row) throw new Error('Failed to upsert OAuth token');
+  if (!row) throw new Error("Failed to upsert OAuth token");
   return mapToToken(row);
 }
 
-export async function deleteOAuthToken(userId: string, provider: string): Promise<void> {
-  await query('DELETE FROM oauth_tokens WHERE user_id = $1 AND provider = $2', [userId, provider]);
+export async function deleteOAuthToken(
+  userId: string,
+  provider: string,
+): Promise<void> {
+  await query("DELETE FROM oauth_tokens WHERE user_id = $1 AND provider = $2", [
+    userId,
+    provider,
+  ]);
 }
 
 function mapToToken(data: Record<string, unknown>): OAuthToken {
@@ -72,7 +81,9 @@ function mapToToken(data: Record<string, unknown>): OAuthToken {
     refreshToken: data.refresh_token as string | undefined,
     tokenType: data.token_type as string,
     scope: data.scope as string | undefined,
-    expiresAt: data.expires_at ? new Date(data.expires_at as string) : undefined,
+    expiresAt: data.expires_at
+      ? new Date(data.expires_at as string)
+      : undefined,
     createdAt: new Date(data.created_at as string),
     updatedAt: new Date(data.updated_at as string),
   };

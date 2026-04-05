@@ -1,4 +1,4 @@
-import pg from 'pg';
+import pg from "pg";
 
 const { Pool } = pg;
 
@@ -11,7 +11,7 @@ export function getPool(): pg.Pool {
 
   if (!connectionString) {
     throw new Error(
-      'Missing DATABASE_URL. Set it to your PostgreSQL connection string (e.g. postgresql://user:pass@localhost:5432/evva).',
+      "Missing DATABASE_URL. Set it to your PostgreSQL connection string (e.g. postgresql://user:pass@localhost:5432/evva).",
     );
   }
 
@@ -21,19 +21,17 @@ export function getPool(): pg.Pool {
 }
 
 /** Ejecuta una query y retorna las rows tipadas */
-export async function query<T extends Record<string, unknown> = Record<string, unknown>>(
-  text: string,
-  params?: unknown[],
-): Promise<T[]> {
+export async function query<
+  T extends Record<string, unknown> = Record<string, unknown>,
+>(text: string, params?: unknown[]): Promise<T[]> {
   const { rows } = await getPool().query(text, params);
   return rows as T[];
 }
 
 /** Ejecuta una query y retorna la primera row o null */
-export async function queryOne<T extends Record<string, unknown> = Record<string, unknown>>(
-  text: string,
-  params?: unknown[],
-): Promise<T | null> {
+export async function queryOne<
+  T extends Record<string, unknown> = Record<string, unknown>,
+>(text: string, params?: unknown[]): Promise<T | null> {
   const rows = await query<T>(text, params);
   return rows[0] ?? null;
 }

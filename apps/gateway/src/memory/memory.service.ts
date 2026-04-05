@@ -1,7 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { MemoryCategory, MemoryFact } from '@evva/core';
-import { saveMemoryFact, searchSimilarFacts, getAllUserFacts } from '@evva/database';
-import { embedText, embedQuery } from '@evva/ai';
+import { Injectable, Logger } from "@nestjs/common";
+import type { MemoryCategory, MemoryFact } from "@evva/core";
+import {
+  saveMemoryFact,
+  searchSimilarFacts,
+  getAllUserFacts,
+} from "@evva/database";
+import { embedText, embedQuery } from "@evva/ai";
 
 @Injectable()
 export class MemoryService {
@@ -18,7 +22,9 @@ export class MemoryService {
     importance?: number;
     sourceMessageId?: string;
   }): Promise<MemoryFact> {
-    this.logger.debug(`Saving fact for user ${params.userId}: "${params.content}"`);
+    this.logger.debug(
+      `Saving fact for user ${params.userId}: "${params.content}"`,
+    );
 
     const { embedding } = await embedText(params.content);
 

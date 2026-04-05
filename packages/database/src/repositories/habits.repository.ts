@@ -1,6 +1,6 @@
-import type { Habit, HabitLog } from '@evva/core';
-import { generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { Habit, HabitLog } from "@evva/core";
+import { generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 // ============================================================
 // Habits
@@ -29,13 +29,13 @@ export async function createHabit(params: {
     ],
   );
 
-  if (!row) throw new Error('Failed to create habit');
+  if (!row) throw new Error("Failed to create habit");
   return mapToHabit(row);
 }
 
 export async function getUserHabits(userId: string): Promise<Habit[]> {
   const rows = await query(
-    'SELECT * FROM habits WHERE user_id = $1 AND is_active = true ORDER BY name',
+    "SELECT * FROM habits WHERE user_id = $1 AND is_active = true ORDER BY name",
     [userId],
   );
   return rows.map(mapToHabit);
@@ -43,7 +43,7 @@ export async function getUserHabits(userId: string): Promise<Habit[]> {
 
 export async function deleteHabit(id: string, userId: string): Promise<void> {
   await query(
-    'UPDATE habits SET is_active = false, updated_at = NOW() WHERE id = $1 AND user_id = $2',
+    "UPDATE habits SET is_active = false, updated_at = NOW() WHERE id = $1 AND user_id = $2",
     [id, userId],
   );
 }
@@ -70,7 +70,7 @@ export async function logHabit(
     [generateId(), habitId, userId, logDate, increment],
   );
 
-  if (!row) throw new Error('Failed to log habit');
+  if (!row) throw new Error("Failed to log habit");
   return mapToHabitLog(row);
 }
 
@@ -88,11 +88,13 @@ export async function getHabitLogs(
   return rows.map(mapToHabitLog);
 }
 
-export async function getTodayProgress(userId: string): Promise<Array<{
-  habit: Habit;
-  logged: number;
-  target: number;
-}>> {
+export async function getTodayProgress(userId: string): Promise<
+  Array<{
+    habit: Habit;
+    logged: number;
+    target: number;
+  }>
+> {
   const today = new Date().toISOString().slice(0, 10);
 
   const rows = await query(
@@ -116,9 +118,10 @@ export async function getTodayProgress(userId: string): Promise<Array<{
 // ============================================================
 
 function mapToHabit(data: Record<string, unknown>): Habit {
-  const reminderTimes = typeof data.reminder_times === 'string'
-    ? JSON.parse(data.reminder_times as string)
-    : (data.reminder_times ?? undefined);
+  const reminderTimes =
+    typeof data.reminder_times === "string"
+      ? JSON.parse(data.reminder_times as string)
+      : (data.reminder_times ?? undefined);
 
   return {
     id: data.id as string,

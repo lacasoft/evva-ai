@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { User, Assistant, OnboardingState } from '@evva/core';
+import { Injectable, Logger } from "@nestjs/common";
+import type { User, Assistant, OnboardingState } from "@evva/core";
 import {
   findUserByTelegramId,
   upsertUser,
@@ -8,7 +8,7 @@ import {
   updateAssistant,
   getOnboardingState,
   upsertOnboardingState,
-} from '@evva/database';
+} from "@evva/database";
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,9 @@ export class UsersService {
     telegramFirstName?: string;
   }): Promise<User> {
     const user = await upsertUser(params);
-    this.logger.debug(`User resolved: ${user.id} (telegram: ${user.telegramId})`);
+    this.logger.debug(
+      `User resolved: ${user.id} (telegram: ${user.telegramId})`,
+    );
     return user;
   }
 
@@ -51,11 +53,14 @@ export class UsersService {
 
   async completeOnboarding(userId: string): Promise<void> {
     await updateAssistant(userId, { onboardingCompleted: true });
-    await upsertOnboardingState(userId, 'completed', {});
+    await upsertOnboardingState(userId, "completed", {});
     this.logger.log(`Onboarding completed for user ${userId}`);
   }
 
-  async updateLearnedPreferences(userId: string, preferences: string): Promise<void> {
+  async updateLearnedPreferences(
+    userId: string,
+    preferences: string,
+  ): Promise<void> {
     await updateAssistant(userId, { learnedPreferences: preferences });
   }
 
@@ -69,8 +74,8 @@ export class UsersService {
 
   async setOnboardingStep(
     userId: string,
-    step: OnboardingState['currentStep'],
-    data: OnboardingState['data'] = {},
+    step: OnboardingState["currentStep"],
+    data: OnboardingState["data"] = {},
   ): Promise<void> {
     await upsertOnboardingState(userId, step, data);
   }

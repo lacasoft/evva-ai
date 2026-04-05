@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 // ============================================================
 // ID generation
@@ -11,18 +11,22 @@ export function generateId(): string {
 // Date utils
 // ============================================================
 export function nowInTimezone(timezone: string): Date {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+  return new Date(new Date().toLocaleString("en-US", { timeZone: timezone }));
 }
 
-export function formatDateForUser(date: Date, timezone: string, language = 'es'): string {
-  return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', {
+export function formatDateForUser(
+  date: Date,
+  timezone: string,
+  language = "es",
+): string {
+  return date.toLocaleDateString(language === "es" ? "es-MX" : "en-US", {
     timeZone: timezone,
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -31,12 +35,12 @@ export function formatDateForUser(date: Date, timezone: string, language = 'es')
 // ============================================================
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 3) + '...';
+  return text.slice(0, maxLength - 3) + "...";
 }
 
 export function sanitizeTelegramMessage(text: string): string {
   // Escape caracteres especiales de MarkdownV2
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&');
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
 }
 
 // ============================================================
@@ -57,9 +61,11 @@ export function isValidAssistantName(name: string): boolean {
 }
 
 export function normalizeAssistantName(name: string): string {
-  return name.trim().split(' ').map(word =>
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  ).join(' ');
+  return name
+    .trim()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 // ============================================================
@@ -72,7 +78,7 @@ export class EvvaError extends Error {
     public readonly context?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'EvvaError';
+    this.name = "EvvaError";
   }
 }
 

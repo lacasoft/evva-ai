@@ -150,10 +150,74 @@ evva/
 ├── packages/
 │   ├── core/                 # Shared types, constants, and utils
 │   ├── database/             # PostgreSQL client (pg) and repositories
-│   └── ai/                   # LLM (Claude), embeddings (Voyage), prompts
+│   ├── ai/                   # LLM (Claude), embeddings (Voyage), prompts
+│   └── skills/               # Modular skill plugins (18 skills)
+│       └── src/
+│           ├── registry.ts        # Central skill registry
+│           ├── base-skill.ts      # SkillDefinition interface
+│           ├── memory/            # Persistent semantic memory
+│           ├── notes/             # Notes and lists
+│           ├── contacts/          # Contact management
+│           ├── reminders/         # Scheduled reminders
+│           ├── finance/           # Personal finance (cards, transactions, savings)
+│           ├── health/            # Medication and habit tracking
+│           ├── emergency/         # Emergency contacts
+│           ├── calendar/          # Google Calendar
+│           ├── gmail/             # Gmail (read, search, send)
+│           ├── weather/           # Weather lookup
+│           ├── search/            # Web search (Brave)
+│           ├── news/              # News summary
+│           ├── translator/        # Language translation
+│           ├── exchange/          # Currency exchange rates
+│           ├── dictation/         # Smart message drafting
+│           ├── briefing/          # Daily proactive briefing
+│           ├── voice/             # Voice note transcription
+│           └── vision/            # Photo and document analysis
 │
 └── docs/                     # Setup guides and documentation
 ```
+
+## Adding a New Skill
+
+Each skill is a self-contained module. To add a new one:
+
+```typescript
+// packages/skills/src/my-skill/index.ts
+import { tool } from 'ai';
+import { z } from 'zod';
+import type { SkillDefinition } from '../base-skill.js';
+
+export const mySkill: SkillDefinition = {
+  name: 'my-skill',
+  description: 'What this skill does',
+  category: 'utility',
+  forProfiles: ['young', 'adult', 'senior'],
+  requiredEnv: ['MY_API_KEY'],  // optional
+
+  buildTools: (ctx) => ({
+    my_tool: tool({
+      description: 'Tool description for the LLM',
+      parameters: z.object({ input: z.string() }),
+      execute: async ({ input }) => {
+        return { success: true, result: input };
+      },
+    }),
+  }),
+
+  promptInstructions: [
+    '- my_tool: Description of what this tool does',
+  ],
+};
+```
+
+Then register it in `packages/skills/src/index.ts`:
+```typescript
+export { mySkill } from './my-skill/index.js';
+import { mySkill } from './my-skill/index.js';
+skillRegistry.register(mySkill);
+```
+
+The skill is automatically available to the LLM. No other files need to change.
 
 ---
 
