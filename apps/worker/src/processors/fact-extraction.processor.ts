@@ -1,9 +1,22 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Worker, type Job } from 'bullmq';
-import IORedis from 'ioredis';
-import { QUEUE_NAMES, type FactExtractionPayload, type MemoryCategory } from '@evva/core';
-import { saveMemoryFact } from '@evva/database';
-import { generateResponse, embedText, buildFactExtractionPrompt } from '@evva/ai';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
+import { Worker, type Job } from "bullmq";
+import IORedis from "ioredis";
+import {
+  QUEUE_NAMES,
+  type FactExtractionPayload,
+  type MemoryCategory,
+} from "@evva/core";
+import { saveMemoryFact } from "@evva/database";
+import {
+  generateResponse,
+  embedText,
+  buildFactExtractionPrompt,
+} from "@evva/ai";
 
 interface ExtractedFact {
   content: string;
@@ -18,7 +31,7 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
   private worker!: Worker<FactExtractionPayload>;
 
   onModuleInit() {
-    const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
 
     this.connection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null,
@@ -33,11 +46,11 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
       },
     );
 
-    this.worker.on('failed', (job, err) => {
+    this.worker.on("failed", (job, err) => {
       this.logger.error(`Fact extraction failed: ${job?.id} — ${err.message}`);
     });
 
-    this.logger.log('FactExtractionProcessor iniciado');
+    this.logger.log("FactExtractionProcessor iniciado");
   }
 
   async onModuleDestroy() {
@@ -53,7 +66,7 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
     const { userId, sessionId, messages } = job.data;
 
     // Solo procesar conversaciones con al menos un mensaje del usuario
-    const userMessages = messages.filter((m) => m.role === 'user');
+    const userMessages = messages.filter((m) => m.role === "user");
     if (userMessages.length === 0) return;
 
     this.logger.debug(
@@ -66,8 +79,8 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
 
       const response = await generateResponse({
         systemPrompt:
-          'Eres un extractor de información. Responde SOLO con JSON válido, sin explicaciones.',
-        messages: [{ role: 'user', content: extractionPrompt }],
+          "Eres un extractor de información. Responde SOLO con JSON válido, sin explicaciones.",
+        messages: [{ role: "user", content: extractionPrompt }],
         maxTokens: 512,
         temperature: 0.1, // Baja temperatura para extracciones más consistentes
       });
@@ -76,9 +89,7 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
       const facts = this.parseFacts(response.text);
 
       if (facts.length === 0) {
-        this.logger.debug(
-          `No facts extracted from session ${sessionId}`,
-        );
+        this.logger.debug(`No facts extracted from session ${sessionId}`);
         return;
       }
 
@@ -100,9 +111,7 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
               sourceMessageId: sessionId,
             });
           } catch (err) {
-            this.logger.error(
-              `Failed to save fact "${fact.content}": ${err}`,
-            );
+            this.logger.error(`Failed to save fact "${fact.content}": ${err}`);
           }
         }),
       );
@@ -122,8 +131,8 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
     try {
       // Limpiar posibles markdown code blocks
       const cleaned = rawText
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
         .trim();
 
       const parsed = JSON.parse(cleaned) as { facts?: unknown[] };
@@ -133,24 +142,35 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
       }
 
       const VALID_CATEGORIES: MemoryCategory[] = [
-        'personal', 'relationship', 'work',
-        'preference', 'goal', 'reminder', 'other',
+        "personal",
+        "relationship",
+        "work",
+        "preference",
+        "goal",
+        "reminder",
+        "other",
       ];
 
       return parsed.facts
-        .filter((f): f is Record<string, unknown> => typeof f === 'object' && f !== null)
-        .filter((f) => typeof f.content === 'string' && f.content.trim().length > 0)
+        .filter(
+          (f): f is Record<string, unknown> =>
+            typeof f === "object" && f !== null,
+        )
+        .filter(
+          (f) => typeof f.content === "string" && f.content.trim().length > 0,
+        )
         .map((f) => ({
           content: String(f.content).trim().slice(0, 500), // Max 500 chars
           category: VALID_CATEGORIES.includes(f.category as MemoryCategory)
             ? (f.category as MemoryCategory)
-            : 'other',
-          importance: typeof f.importance === 'number'
-            ? Math.min(1, Math.max(0.1, f.importance))
-            : 0.5,
+            : "other",
+          importance:
+            typeof f.importance === "number"
+              ? Math.min(1, Math.max(0.1, f.importance))
+              : 0.5,
         }));
     } catch {
-      this.logger.debug('Failed to parse fact extraction response');
+      this.logger.debug("Failed to parse fact extraction response");
       return [];
     }
   }

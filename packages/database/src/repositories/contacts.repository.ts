@@ -1,6 +1,6 @@
-import type { Contact } from '@evva/core';
-import { generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { Contact } from "@evva/core";
+import { generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 export async function createContact(params: {
   userId: string;
@@ -27,11 +27,14 @@ export async function createContact(params: {
     ],
   );
 
-  if (!row) throw new Error('Failed to create contact');
+  if (!row) throw new Error("Failed to create contact");
   return mapToContact(row);
 }
 
-export async function searchContacts(userId: string, searchTerm: string): Promise<Contact[]> {
+export async function searchContacts(
+  userId: string,
+  searchTerm: string,
+): Promise<Contact[]> {
   const rows = await query(
     `SELECT * FROM contacts
      WHERE user_id = $1
@@ -45,16 +48,19 @@ export async function searchContacts(userId: string, searchTerm: string): Promis
 
 export async function getUserContacts(userId: string): Promise<Contact[]> {
   const rows = await query(
-    'SELECT * FROM contacts WHERE user_id = $1 ORDER BY name ASC',
+    "SELECT * FROM contacts WHERE user_id = $1 ORDER BY name ASC",
     [userId],
   );
 
   return rows.map(mapToContact);
 }
 
-export async function getContactById(id: string, userId: string): Promise<Contact | null> {
+export async function getContactById(
+  id: string,
+  userId: string,
+): Promise<Contact | null> {
   const row = await queryOne(
-    'SELECT * FROM contacts WHERE id = $1 AND user_id = $2',
+    "SELECT * FROM contacts WHERE id = $1 AND user_id = $2",
     [id, userId],
   );
 
@@ -65,9 +71,11 @@ export async function getContactById(id: string, userId: string): Promise<Contac
 export async function updateContact(
   id: string,
   userId: string,
-  updates: Partial<Pick<Contact, 'name' | 'phone' | 'email' | 'relationship' | 'notes'>>,
+  updates: Partial<
+    Pick<Contact, "name" | "phone" | "email" | "relationship" | "notes">
+  >,
 ): Promise<void> {
-  const setClauses: string[] = ['updated_at = NOW()'];
+  const setClauses: string[] = ["updated_at = NOW()"];
   const values: unknown[] = [];
   let paramIndex = 1;
 
@@ -95,13 +103,16 @@ export async function updateContact(
   values.push(id, userId);
 
   await query(
-    `UPDATE contacts SET ${setClauses.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
+    `UPDATE contacts SET ${setClauses.join(", ")} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
     values,
   );
 }
 
 export async function deleteContact(id: string, userId: string): Promise<void> {
-  await query('DELETE FROM contacts WHERE id = $1 AND user_id = $2', [id, userId]);
+  await query("DELETE FROM contacts WHERE id = $1 AND user_id = $2", [
+    id,
+    userId,
+  ]);
 }
 
 function mapToContact(data: Record<string, unknown>): Contact {

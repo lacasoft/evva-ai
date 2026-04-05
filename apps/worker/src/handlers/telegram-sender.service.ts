@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Bot } from 'grammy';
-import { LIMITS } from '@evva/core';
+import { Injectable, Logger } from "@nestjs/common";
+import { Bot } from "grammy";
+import { LIMITS } from "@evva/core";
 
 @Injectable()
 export class TelegramSenderService {
@@ -9,7 +9,8 @@ export class TelegramSenderService {
 
   constructor() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    if (!token) throw new Error('TELEGRAM_BOT_TOKEN no configurado en el worker');
+    if (!token)
+      throw new Error("TELEGRAM_BOT_TOKEN no configurado en el worker");
     this.bot = new Bot(token);
   }
 
@@ -37,15 +38,15 @@ export class TelegramSenderService {
   private splitMessage(text: string): string[] {
     const maxLen = LIMITS.TELEGRAM_MAX_MESSAGE_LENGTH - 100;
     const chunks: string[] = [];
-    const paragraphs = text.split('\n\n');
-    let current = '';
+    const paragraphs = text.split("\n\n");
+    let current = "";
 
     for (const para of paragraphs) {
-      if ((current + '\n\n' + para).length > maxLen) {
+      if ((current + "\n\n" + para).length > maxLen) {
         if (current) chunks.push(current.trim());
         current = para;
       } else {
-        current = current ? current + '\n\n' + para : para;
+        current = current ? current + "\n\n" + para : para;
       }
     }
 

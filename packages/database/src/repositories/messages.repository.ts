@@ -1,13 +1,13 @@
-import type { Message, MessageRole } from '@evva/core';
-import { LIMITS, generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { Message, MessageRole } from "@evva/core";
+import { LIMITS, generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 export async function saveMessage(params: {
   userId: string;
   sessionId: string;
   role: MessageRole;
   content: string;
-  metadata?: Message['metadata'];
+  metadata?: Message["metadata"];
 }): Promise<Message> {
   const id = generateId();
 
@@ -26,7 +26,7 @@ export async function saveMessage(params: {
   );
 
   if (!row) {
-    throw new Error('Failed to save message');
+    throw new Error("Failed to save message");
   }
 
   return mapToMessage(row);
@@ -48,7 +48,9 @@ export async function getRecentMessages(
   return rows.map(mapToMessage).reverse();
 }
 
-export async function getSessionMessages(sessionId: string): Promise<Message[]> {
+export async function getSessionMessages(
+  sessionId: string,
+): Promise<Message[]> {
   const rows = await query(
     `SELECT * FROM messages
      WHERE session_id = $1
@@ -70,7 +72,7 @@ function mapToMessage(data: Record<string, unknown>): Message {
     sessionId: data.session_id as string,
     role: data.role as MessageRole,
     content: data.content as string,
-    metadata: data.metadata as Message['metadata'],
+    metadata: data.metadata as Message["metadata"],
     createdAt: new Date(data.created_at as string),
   };
 }

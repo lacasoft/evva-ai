@@ -1,26 +1,24 @@
-import type { Assistant, OnboardingState, User } from '@evva/core';
-import { generateId } from '@evva/core';
-import { query, queryOne } from '../client.js';
+import type { Assistant, OnboardingState, User } from "@evva/core";
+import { generateId } from "@evva/core";
+import { query, queryOne } from "../client.js";
 
 // ============================================================
 // Users
 // ============================================================
 
-export async function findUserByTelegramId(telegramId: number): Promise<User | null> {
-  const row = await queryOne(
-    'SELECT * FROM users WHERE telegram_id = $1',
-    [telegramId],
-  );
+export async function findUserByTelegramId(
+  telegramId: number,
+): Promise<User | null> {
+  const row = await queryOne("SELECT * FROM users WHERE telegram_id = $1", [
+    telegramId,
+  ]);
 
   if (!row) return null;
   return mapToUser(row);
 }
 
 export async function findUserById(id: string): Promise<User | null> {
-  const row = await queryOne(
-    'SELECT * FROM users WHERE id = $1',
-    [id],
-  );
+  const row = await queryOne("SELECT * FROM users WHERE id = $1", [id]);
 
   if (!row) return null;
   return mapToUser(row);
@@ -30,7 +28,7 @@ export async function createUser(params: {
   telegramId: number;
   telegramUsername?: string;
   telegramFirstName?: string;
-  language?: 'es' | 'en';
+  language?: "es" | "en";
   timezone?: string;
 }): Promise<User> {
   const id = generateId();
@@ -45,14 +43,14 @@ export async function createUser(params: {
       params.telegramId,
       params.telegramUsername ?? null,
       params.telegramFirstName ?? null,
-      params.language ?? 'es',
-      params.timezone ?? 'America/Mexico_City',
+      params.language ?? "es",
+      params.timezone ?? "America/Mexico_City",
       now,
     ],
   );
 
   if (!row) {
-    throw new Error('Failed to create user');
+    throw new Error("Failed to create user");
   }
 
   return mapToUser(row);
@@ -72,9 +70,11 @@ export async function upsertUser(params: {
 // Assistants
 // ============================================================
 
-export async function findAssistantByUserId(userId: string): Promise<Assistant | null> {
+export async function findAssistantByUserId(
+  userId: string,
+): Promise<Assistant | null> {
   const row = await queryOne(
-    'SELECT * FROM assistant_config WHERE user_id = $1',
+    "SELECT * FROM assistant_config WHERE user_id = $1",
     [userId],
   );
 
@@ -105,7 +105,7 @@ export async function createAssistant(params: {
   );
 
   if (!row) {
-    throw new Error('Failed to create assistant');
+    throw new Error("Failed to create assistant");
   }
 
   return mapToAssistant(row);
@@ -113,9 +113,14 @@ export async function createAssistant(params: {
 
 export async function updateAssistant(
   userId: string,
-  updates: Partial<Pick<Assistant, 'name' | 'personalityBase' | 'learnedPreferences' | 'onboardingCompleted'>>,
+  updates: Partial<
+    Pick<
+      Assistant,
+      "name" | "personalityBase" | "learnedPreferences" | "onboardingCompleted"
+    >
+  >,
 ): Promise<void> {
-  const setClauses: string[] = ['updated_at = NOW()'];
+  const setClauses: string[] = ["updated_at = NOW()"];
   const values: unknown[] = [];
   let paramIndex = 1;
 
@@ -139,7 +144,7 @@ export async function updateAssistant(
   values.push(userId);
 
   await query(
-    `UPDATE assistant_config SET ${setClauses.join(', ')} WHERE user_id = $${paramIndex}`,
+    `UPDATE assistant_config SET ${setClauses.join(", ")} WHERE user_id = $${paramIndex}`,
     values,
   );
 }
@@ -148,9 +153,11 @@ export async function updateAssistant(
 // Onboarding State
 // ============================================================
 
-export async function getOnboardingState(userId: string): Promise<OnboardingState | null> {
+export async function getOnboardingState(
+  userId: string,
+): Promise<OnboardingState | null> {
   const row = await queryOne(
-    'SELECT * FROM onboarding_state WHERE user_id = $1',
+    "SELECT * FROM onboarding_state WHERE user_id = $1",
     [userId],
   );
 
@@ -158,7 +165,7 @@ export async function getOnboardingState(userId: string): Promise<OnboardingStat
 
   return {
     userId: row.user_id as string,
-    currentStep: row.current_step as OnboardingState['currentStep'],
+    currentStep: row.current_step as OnboardingState["currentStep"],
     data: (row.data as Record<string, unknown>) ?? {},
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
@@ -167,8 +174,8 @@ export async function getOnboardingState(userId: string): Promise<OnboardingStat
 
 export async function upsertOnboardingState(
   userId: string,
-  step: OnboardingState['currentStep'],
-  data: OnboardingState['data'],
+  step: OnboardingState["currentStep"],
+  data: OnboardingState["data"],
 ): Promise<void> {
   await query(
     `INSERT INTO onboarding_state (user_id, current_step, data, updated_at)
@@ -188,7 +195,7 @@ function mapToUser(data: Record<string, unknown>): User {
     telegramId: Number(data.telegram_id),
     telegramUsername: data.telegram_username as string | undefined,
     telegramFirstName: data.telegram_first_name as string | undefined,
-    language: data.language as 'es' | 'en',
+    language: data.language as "es" | "en",
     timezone: data.timezone as string,
     isActive: data.is_active as boolean,
     createdAt: new Date(data.created_at as string),

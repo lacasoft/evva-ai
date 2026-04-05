@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { MemoryService } from './memory.service.js';
+import { Module } from "@nestjs/common";
+import { MemoryService } from "./memory.service.js";
 
 @Module({
   providers: [MemoryService],

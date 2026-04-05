@@ -1,8 +1,17 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
-import { QUEUE_NAMES, type ScheduledJobPayload, type FactExtractionPayload } from '@evva/core';
-import { generateId } from '@evva/core';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
+import { Queue } from "bullmq";
+import IORedis from "ioredis";
+import {
+  QUEUE_NAMES,
+  type ScheduledJobPayload,
+  type FactExtractionPayload,
+} from "@evva/core";
+import { generateId } from "@evva/core";
 
 @Injectable()
 export class SchedulerService implements OnModuleInit, OnModuleDestroy {
@@ -12,8 +21,10 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
   private factExtractionQueue!: Queue<FactExtractionPayload>;
 
   onModuleInit() {
-    const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
-    this.logger.log(`Conectando a Redis: ${redisUrl.replace(/:[^:@]+@/, ':***@')}`);
+    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
+    this.logger.log(
+      `Conectando a Redis: ${redisUrl.replace(/:[^:@]+@/, ":***@")}`,
+    );
 
     this.connection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null, // Requerido por BullMQ
@@ -29,7 +40,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       { connection: this.connection },
     );
 
-    this.logger.log('Scheduler conectado a Redis');
+    this.logger.log("Scheduler conectado a Redis");
   }
 
   async onModuleDestroy() {
@@ -54,14 +65,14 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     const delay = params.triggerAt.getTime() - Date.now();
 
     if (delay < 0) {
-      throw new Error('No se puede programar un recordatorio en el pasado');
+      throw new Error("No se puede programar un recordatorio en el pasado");
     }
 
     const payload: ScheduledJobPayload = {
       jobId,
       userId: params.userId,
       telegramId: params.telegramId,
-      type: 'reminder',
+      type: "reminder",
       context: {
         message: params.message,
         assistantName: params.assistantName,
@@ -69,11 +80,11 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       },
     };
 
-    await this.scheduledJobsQueue.add('reminder', payload, {
+    await this.scheduledJobsQueue.add("reminder", payload, {
       jobId,
       delay,
       attempts: 3,
-      backoff: { type: 'exponential', delay: 5000 },
+      backoff: { type: "exponential", delay: 5000 },
       removeOnComplete: { age: 60 * 60 * 24 }, // Mantener 24h después de completar
       removeOnFail: { age: 60 * 60 * 24 * 7 }, // Mantener 7 días si falla
     });
@@ -92,7 +103,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
   async enqueueFactExtraction(params: {
     userId: string;
     sessionId: string;
-    messages: FactExtractionPayload['messages'];
+    messages: FactExtractionPayload["messages"];
   }): Promise<void> {
     const payload: FactExtractionPayload = {
       userId: params.userId,
@@ -100,9 +111,9 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       messages: params.messages,
     };
 
-    await this.factExtractionQueue.add('extract-facts', payload, {
+    await this.factExtractionQueue.add("extract-facts", payload, {
       attempts: 2,
-      backoff: { type: 'fixed', delay: 3000 },
+      backoff: { type: "fixed", delay: 3000 },
       removeOnComplete: true,
       removeOnFail: { age: 60 * 60 * 24 },
     });

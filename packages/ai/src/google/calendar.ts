@@ -3,14 +3,14 @@
 // Docs: https://developers.google.com/calendar/api/v3/reference
 // ============================================================
 
-const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3';
+const GOOGLE_CALENDAR_API = "https://www.googleapis.com/calendar/v3";
 
 export interface CalendarEvent {
   id: string;
   summary: string;
   description?: string;
   location?: string;
-  start: string;    // ISO date or datetime
+  start: string; // ISO date or datetime
   end: string;
   allDay: boolean;
   status: string;
@@ -20,7 +20,7 @@ export interface CreateEventParams {
   summary: string;
   description?: string;
   location?: string;
-  startDateTime: string;  // ISO 8601
+  startDateTime: string; // ISO 8601
   endDateTime: string;
   timeZone: string;
 }
@@ -31,17 +31,20 @@ export interface CreateEventParams {
 
 export function getGoogleAuthUrl(state: string): string {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  if (!clientId) throw new Error('Missing GOOGLE_CLIENT_ID');
+  if (!clientId) throw new Error("Missing GOOGLE_CLIENT_ID");
 
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI ?? 'http://localhost:3000/api/oauth/google/callback';
+  const redirectUri =
+    process.env.GOOGLE_REDIRECT_URI ??
+    "http://localhost:3000/api/oauth/google/callback";
 
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    response_type: 'code',
-    scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send',
-    access_type: 'offline',
-    prompt: 'consent',
+    response_type: "code",
+    scope:
+      "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send",
+    access_type: "offline",
+    prompt: "consent",
     state,
   });
 
@@ -56,27 +59,31 @@ export async function exchangeGoogleCode(code: string): Promise<{
 }> {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI ?? 'http://localhost:3000/api/oauth/google/callback';
+  const redirectUri =
+    process.env.GOOGLE_REDIRECT_URI ??
+    "http://localhost:3000/api/oauth/google/callback";
 
   if (!clientId || !clientSecret) {
-    throw new Error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
+    throw new Error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
   }
 
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
       client_id: clientId,
       client_secret: clientSecret,
       redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
+      grant_type: "authorization_code",
     }),
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Google token exchange failed: ${response.status} ${error}`);
+    throw new Error(
+      `Google token exchange failed: ${response.status} ${error}`,
+    );
   }
 
   const data = (await response.json()) as {
@@ -102,17 +109,17 @@ export async function refreshGoogleToken(refreshToken: string): Promise<{
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
+    throw new Error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
   }
 
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       refresh_token: refreshToken,
       client_id: clientId,
       client_secret: clientSecret,
-      grant_type: 'refresh_token',
+      grant_type: "refresh_token",
     }),
   });
 
@@ -141,22 +148,22 @@ export async function listCalendarEvents(
   params?: { timeMin?: string; timeMax?: string; maxResults?: number },
 ): Promise<CalendarEvent[]> {
   const queryParams = new URLSearchParams({
-    orderBy: 'startTime',
-    singleEvents: 'true',
+    orderBy: "startTime",
+    singleEvents: "true",
     maxResults: String(params?.maxResults ?? 10),
   });
 
-  if (params?.timeMin) queryParams.set('timeMin', params.timeMin);
-  if (params?.timeMax) queryParams.set('timeMax', params.timeMax);
+  if (params?.timeMin) queryParams.set("timeMin", params.timeMin);
+  if (params?.timeMax) queryParams.set("timeMax", params.timeMax);
 
   // Default: desde ahora hasta 7 días
   if (!params?.timeMin) {
-    queryParams.set('timeMin', new Date().toISOString());
+    queryParams.set("timeMin", new Date().toISOString());
   }
   if (!params?.timeMax) {
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
-    queryParams.set('timeMax', nextWeek.toISOString());
+    queryParams.set("timeMax", nextWeek.toISOString());
   }
 
   const response = await fetch(
@@ -183,13 +190,13 @@ export async function listCalendarEvents(
     }>;
   };
 
-  return (data.items ?? []).map(item => ({
+  return (data.items ?? []).map((item) => ({
     id: item.id,
-    summary: item.summary ?? '(sin título)',
+    summary: item.summary ?? "(sin título)",
     description: item.description,
     location: item.location,
-    start: item.start.dateTime ?? item.start.date ?? '',
-    end: item.end.dateTime ?? item.end.date ?? '',
+    start: item.start.dateTime ?? item.start.date ?? "",
+    end: item.end.dateTime ?? item.end.date ?? "",
     allDay: !item.start.dateTime,
     status: item.status,
   }));
@@ -202,10 +209,10 @@ export async function createCalendarEvent(
   const response = await fetch(
     `${GOOGLE_CALENDAR_API}/calendars/primary/events`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         summary: params.summary,
@@ -225,7 +232,9 @@ export async function createCalendarEvent(
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Google Calendar create failed: ${response.status} ${error}`);
+    throw new Error(
+      `Google Calendar create failed: ${response.status} ${error}`,
+    );
   }
 
   const item = (await response.json()) as {
@@ -243,8 +252,8 @@ export async function createCalendarEvent(
     summary: item.summary,
     description: item.description,
     location: item.location,
-    start: item.start.dateTime ?? item.start.date ?? '',
-    end: item.end.dateTime ?? item.end.date ?? '',
+    start: item.start.dateTime ?? item.start.date ?? "",
+    end: item.end.dateTime ?? item.end.date ?? "",
     allDay: !item.start.dateTime,
     status: item.status,
   };

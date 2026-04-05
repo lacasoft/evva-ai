@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { User, Assistant, Message } from '@evva/core';
-import { generateSessionId, LIMITS } from '@evva/core';
-import { saveMessage, getRecentMessages } from '@evva/database';
-import { generateResponse } from '@evva/ai';
-import { PersonaService } from '../persona/persona.service.js';
-import { ToolsService } from '../tools/tools.service.js';
-import { SchedulerService } from '../scheduler/scheduler.service.js';
+import { Injectable, Logger } from "@nestjs/common";
+import type { User, Assistant, Message } from "@evva/core";
+import { generateSessionId, LIMITS } from "@evva/core";
+import { saveMessage, getRecentMessages } from "@evva/database";
+import { generateResponse } from "@evva/ai";
+import { PersonaService } from "../persona/persona.service.js";
+import { ToolsService } from "../tools/tools.service.js";
+import { SchedulerService } from "../scheduler/scheduler.service.js";
 
 export interface ConversationResult {
   reply: string;
@@ -50,7 +50,7 @@ export class ConversationService {
     const userMessage = await saveMessage({
       userId: user.id,
       sessionId,
-      role: 'user',
+      role: "user",
       content: incomingText,
       metadata: {
         telegramMessageId: params.telegramMessageId,
@@ -58,7 +58,10 @@ export class ConversationService {
     });
 
     // 2. Cargar historial reciente
-    const history = await getRecentMessages(user.id, LIMITS.CONVERSATION_WINDOW);
+    const history = await getRecentMessages(
+      user.id,
+      LIMITS.CONVERSATION_WINDOW,
+    );
 
     // 3. Construir system prompt dinámico con memoria semántica
     const systemPrompt = await this.personaService.buildPromptForMessage({
@@ -70,23 +73,23 @@ export class ConversationService {
     // 4. Formatear historial para el LLM (excluir el mensaje actual que ya está al final)
     const historyForLLM = history
       .filter((m) => m.id !== userMessage.id)
-      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => ({
-        role: m.role as 'user' | 'assistant',
+        role: m.role as "user" | "assistant",
         content: m.content,
       }));
 
     // Agregar el mensaje actual (con imagen si existe)
     if (params.imageData) {
       historyForLLM.push({
-        role: 'user',
+        role: "user",
         content: [
-          { type: 'text', text: incomingText || 'Describe esta imagen.' },
-          { type: 'image', image: params.imageData },
+          { type: "text", text: incomingText || "Describe esta imagen." },
+          { type: "image", image: params.imageData },
         ],
       } as any);
     } else {
-      historyForLLM.push({ role: 'user', content: incomingText });
+      historyForLLM.push({ role: "user", content: incomingText });
     }
 
     // 5. Construir tools disponibles para esta sesión
@@ -100,17 +103,17 @@ export class ConversationService {
       maxTokens: 1024,
     });
 
-    const replyText = llmResponse.text || 'No entendí bien, ¿puedes repetirlo?';
+    const replyText = llmResponse.text || "No entendí bien, ¿puedes repetirlo?";
 
     // 7. Guardar respuesta del asistente
     await saveMessage({
       userId: user.id,
       sessionId,
-      role: 'assistant',
+      role: "assistant",
       content: replyText,
       metadata: {
         tokensUsed: llmResponse.usage.totalTokens,
-        modelUsed: 'claude-sonnet-4-5',
+        modelUsed: "claude-sonnet-4-5",
         toolsUsed: llmResponse.toolCalls?.map((tc) => tc.toolName),
       },
     });
@@ -120,10 +123,7 @@ export class ConversationService {
       .enqueueFactExtraction({
         userId: user.id,
         sessionId,
-        messages: [
-          ...historyForLLM,
-          { role: 'assistant', content: replyText },
-        ],
+        messages: [...historyForLLM, { role: "assistant", content: replyText }],
       })
       .catch((err) => {
         this.logger.error(`Failed to enqueue fact extraction: ${err}`);

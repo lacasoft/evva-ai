@@ -1,14 +1,16 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Worker, type Job } from 'bullmq';
-import IORedis from 'ioredis';
 import {
-  QUEUE_NAMES,
-  type ScheduledJobPayload,
-} from '@evva/core';
-import { findUserById } from '@evva/database';
-import { generateResponse } from '@evva/ai';
-import { buildProactiveMessagePrompt } from '@evva/ai';
-import { TelegramSenderService } from '../handlers/telegram-sender.service.js';
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
+import { Worker, type Job } from "bullmq";
+import IORedis from "ioredis";
+import { QUEUE_NAMES, type ScheduledJobPayload } from "@evva/core";
+import { findUserById } from "@evva/database";
+import { generateResponse } from "@evva/ai";
+import { buildProactiveMessagePrompt } from "@evva/ai";
+import { TelegramSenderService } from "../handlers/telegram-sender.service.js";
 
 @Injectable()
 export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
@@ -19,7 +21,7 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly telegramSender: TelegramSenderService) {}
 
   onModuleInit() {
-    const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
 
     this.connection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null,
@@ -34,15 +36,15 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
       },
     );
 
-    this.worker.on('completed', (job) => {
+    this.worker.on("completed", (job) => {
       this.logger.log(`Job completed: ${job.id}`);
     });
 
-    this.worker.on('failed', (job, err) => {
+    this.worker.on("failed", (job, err) => {
       this.logger.error(`Job failed: ${job?.id} — ${err.message}`);
     });
 
-    this.logger.log('ScheduledJobProcessor iniciado');
+    this.logger.log("ScheduledJobProcessor iniciado");
   }
 
   async onModuleDestroy() {
@@ -82,7 +84,7 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
         systemPrompt: prompt,
         messages: [
           {
-            role: 'user',
+            role: "user",
             content: `Genera el mensaje de recordatorio ahora.`,
           },
         ],
@@ -92,7 +94,7 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
 
       const message = response.text?.trim();
       if (!message) {
-        throw new Error('LLM returned empty message for proactive job');
+        throw new Error("LLM returned empty message for proactive job");
       }
 
       // Enviar por Telegram
