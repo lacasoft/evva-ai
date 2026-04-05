@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/evva-logo.png" alt="Evva" width="180" />
+  <img src="assets/evva-logo.png" alt="Evva" width="250" />
 </p>
 
 <h1 align="center">Evva</h1>
@@ -20,6 +20,10 @@
 
 <p align="center">
   <a href="README.es.md">Leer en Espanol</a> &middot; <a href="docs/SETUP.md">Setup Guide</a> &middot; <a href="https://github.com/lacasoft/evva-ai/releases">Releases</a>
+</p>
+
+<p align="center">
+  <img src="assets/intro.gif" alt="Evva Demo" width="350" />
 </p>
 
 ---
