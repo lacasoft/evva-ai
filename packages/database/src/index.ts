@@ -62,3 +62,25 @@ export {
   updateContact,
   deleteContact,
 } from './repositories/contacts.repository.js';
+
+export {
+  createMedication,
+  getUserMedications,
+  updateMedication,
+  deleteMedication,
+} from './repositories/medications.repository.js';
+
+export {
+  createHabit,
+  getUserHabits,
+  logHabit,
+  getHabitLogs,
+  getTodayProgress,
+  deleteHabit,
+} from './repositories/habits.repository.js';
+
+export {
+  createEmergencyContact,
+  getUserEmergencyContacts,
+  deleteEmergencyContact,
+} from './repositories/emergency.repository.js';

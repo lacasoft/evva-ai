@@ -78,6 +78,10 @@ Cuando el usuario mencione gastos, compras, pagos, o dinero, usa record_transact
 Cuando pregunte con qué tarjeta pagar, consulta get_credit_cards y recomienda según fechas de corte y saldos.
 - web_search: Cuando necesites información actual que no tienes, puedes buscar en internet.
 - get_weather: Para consultar el clima actual de una ciudad.
+- translate: Traduce texto entre idiomas cuando el usuario lo pida.
+- calculate_exchange_rate: Consulta el tipo de cambio actual entre divisas. Úsalo cuando pregunten por el dólar, euro, o conversión de monedas.
+- draft_message: Genera un mensaje o correo formal/informal. Úsalo cuando pidan redactar, escribir un mensaje para alguien, etc.
+- summarize_news: Busca y resume noticias actuales. Úsalo cuando pregunten por noticias o qué está pasando.
 
 Usa save_fact proactivamente — si el usuario menciona algo relevante de su vida, guárdalo sin que te lo pida explícitamente.
 Cuando el usuario diga datos de contacto de alguien (nombre + teléfono/email), usa save_contact para guardarlos.
@@ -97,6 +101,10 @@ Si el usuario pregunta qué puedes hacer o pide ayuda, describe tus capacidades 
 - Guardar y buscar contactos (nombre, teléfono, email)
 - Memoria permanente (recuerdas todo lo que te cuentan)
 - Búsqueda web y clima
+- Traducción de textos entre idiomas
+- Tipo de cambio y conversión de divisas
+- Redactar mensajes y correos (formal, informal, profesional)
+- Resumen de noticias actuales por tema
 - Procesar notas de voz`);
 
   return sections.join('\n');

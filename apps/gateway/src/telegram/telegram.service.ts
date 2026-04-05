@@ -70,6 +70,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     // Fotos
     this.bot.on('message:photo', (ctx) => this.handlePhoto(ctx));
 
+    // Documentos (PDF, etc.)
+    this.bot.on('message:document', (ctx) => this.handleDocument(ctx));
+
+    // Ubicación
+    this.bot.on('message:location', (ctx) => this.handleLocation(ctx));
+
     // Manejo de errores global
     this.bot.catch((err) => {
       this.logger.error(`Bot error: ${err.message ?? err}`, err.stack);
@@ -230,6 +236,120 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         telegramId,
         'No pude procesar la imagen. Intenta de nuevo.',
       );
+    }
+  }
+
+  // ============================================================
+  // Documento — procesa PDF y otros archivos con Claude
+  // ============================================================
+
+  private async handleDocument(ctx: Context) {
+    const telegramId = ctx.from?.id;
+    if (!telegramId) return;
+
+    await ctx.replyWithChatAction('typing');
+
+    try {
+      const doc = ctx.message?.document;
+      if (!doc) return;
+
+      const user = await this.usersService.findOrCreateUser({
+        telegramId,
+        telegramUsername: ctx.from?.username,
+        telegramFirstName: ctx.from?.first_name,
+      });
+
+      const needsOnboarding = await this.onboardingService.needsOnboarding(user.id);
+      if (needsOnboarding) {
+        await this.sendMessage(telegramId, 'Primero necesito que me des un nombre. ¿Cómo quieres llamarme?');
+        return;
+      }
+
+      const file = await ctx.api.getFile(doc.file_id);
+      const fileUrl = `https://api.telegram.org/file/bot${this.bot.token}/${file.file_path}`;
+
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download document: ${response.status}`);
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const fileName = doc.file_name ?? 'document';
+      const mimeType = doc.mime_type ?? '';
+
+      this.logger.log(`Document received from user ${user.id}: ${fileName} (${mimeType}, ${buffer.length} bytes)`);
+
+      const assistant = await this.usersService.getAssistant(user.id);
+      if (!assistant) {
+        await this.sendMessage(telegramId, 'Primero configura tu asistente con /start');
+        return;
+      }
+
+      // Para PDFs e imágenes, enviar como imagen a Claude Vision
+      if (mimeType.startsWith('image/') || mimeType === 'application/pdf') {
+        const result = await this.conversationService.processMessage({
+          user,
+          assistant,
+          incomingText: ctx.message?.caption || `Analiza este documento: ${fileName}`,
+          imageData: buffer,
+          telegramMessageId: ctx.message?.message_id,
+        });
+        await this.sendMessage(telegramId, result.reply);
+      } else {
+        // Para otros archivos de texto, leer como string
+        const textContent = buffer.toString('utf-8').slice(0, 4000);
+        const result = await this.conversationService.processMessage({
+          user,
+          assistant,
+          incomingText: `El usuario envió un archivo "${fileName}". Contenido:\n\n${textContent}`,
+          telegramMessageId: ctx.message?.message_id,
+        });
+        await this.sendMessage(telegramId, result.reply);
+      }
+    } catch (error) {
+      this.logger.error(`Error handling document from ${telegramId}: ${error}`);
+      await this.sendMessage(telegramId, 'No pude procesar el documento. Intenta de nuevo.');
+    }
+  }
+
+  // ============================================================
+  // Ubicación — guardar o compartir con contacto de emergencia
+  // ============================================================
+
+  private async handleLocation(ctx: Context) {
+    const telegramId = ctx.from?.id;
+    if (!telegramId) return;
+
+    await ctx.replyWithChatAction('typing');
+
+    try {
+      const location = ctx.message?.location;
+      if (!location) return;
+
+      const user = await this.usersService.findOrCreateUser({
+        telegramId,
+        telegramUsername: ctx.from?.username,
+        telegramFirstName: ctx.from?.first_name,
+      });
+
+      const assistant = await this.usersService.getAssistant(user.id);
+      if (!assistant) {
+        await this.sendMessage(telegramId, 'Primero configura tu asistente con /start');
+        return;
+      }
+
+      this.logger.log(`Location received from user ${user.id}: ${location.latitude}, ${location.longitude}`);
+
+      const result = await this.conversationService.processMessage({
+        user,
+        assistant,
+        incomingText: `El usuario compartió su ubicación: latitud ${location.latitude}, longitud ${location.longitude}. Pregúntale si quiere que la guarde, la comparta con alguien, o si necesita ayuda con algo cercano.`,
+        telegramMessageId: ctx.message?.message_id,
+      });
+
+      await this.sendMessage(telegramId, result.reply);
+    } catch (error) {
+      this.logger.error(`Error handling location from ${telegramId}: ${error}`);
     }
   }
 

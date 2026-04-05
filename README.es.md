@@ -20,8 +20,17 @@ Asistente personal con IA, memoria real y acciones proactivas. Vive en Telegram.
 - **Resumen diario proactivo** — Activa un briefing matutino y recibe cada dia un mensaje con tus pendientes, eventos del calendario y contexto relevante.
 - **Busqueda web** — Consulta informacion actualizada de internet via Brave Search cuando necesites datos recientes, precios o noticias.
 - **Clima** — Pregunta el clima de cualquier ciudad y obtiene temperatura, sensacion termica, humedad y viento en tiempo real.
-- **Modelo LLM configurable** — Usa Claude Sonnet por defecto a traves de Vercel AI SDK. El modelo se puede cambiar sin modificar la logica del agente.
-- **Rebrandeable** — Cambia el nombre y personalidad del asistente con una variable de entorno. Cada usuario elige el nombre de su asistente durante el onboarding.
+- **Seguimiento de medicamentos** — Registra medicamentos con horarios y dosis. Ideal para adultos mayores.
+- **Seguimiento de habitos** — Trackea habitos diarios como agua, ejercicio, meditacion con progreso visible.
+- **Contactos de emergencia** — Registra y accede rapidamente a contactos de emergencia.
+- **Analisis de documentos** — Envia PDFs o archivos y Evva los analiza con Claude Vision.
+- **Ubicacion** — Comparte tu ubicacion y Evva sugiere acciones.
+- **Traductor** — Traduce texto entre idiomas directamente en la conversacion.
+- **Tipo de cambio** — Conversion de divisas en tiempo real.
+- **Dictado inteligente** — Genera mensajes formales o informales a pedido.
+- **Resumen de noticias** — Busca y resume noticias actuales.
+- **Modelo LLM configurable** — Haiku para desarrollo, Sonnet para produccion.
+- **Rebrandeable** — Cambia el nombre del sistema con `APP_BRAND_NAME` en el `.env`.
 
 ---
 
@@ -221,7 +230,18 @@ El resumen diario funciona de forma similar: un job recurrente revisa pendientes
 | `list_emails` | Lista correos recientes de Gmail con filtros | Google OAuth |
 | `read_email` | Lee el contenido completo de un correo | Google OAuth |
 | `send_email` | Envia un correo desde el Gmail del usuario | Google OAuth |
+| `add_medication` | Registra un medicamento con horarios | -- |
+| `get_medications` | Muestra medicamentos activos | -- |
+| `create_habit` | Crea un habito para trackear diariamente | -- |
+| `log_habit` | Registra progreso en un habito | -- |
+| `get_habit_progress` | Muestra progreso de habitos de hoy | -- |
+| `add_emergency_contact` | Registra un contacto de emergencia | -- |
+| `get_emergency_contacts` | Muestra contactos de emergencia | -- |
 | `configure_daily_briefing` | Activa o configura el resumen diario matutino | Redis |
+| `translate` | Traduce texto entre idiomas | -- |
+| `calculate_exchange_rate` | Conversion de divisas en tiempo real | -- |
+| `draft_message` | Genera mensajes formales o informales | -- |
+| `summarize_news` | Busca y resume noticias actuales | `BRAVE_SEARCH_API_KEY` |
 
 ---
 

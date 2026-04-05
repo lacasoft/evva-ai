@@ -20,10 +20,17 @@
 - **Daily briefing** -- proactive morning summary of your day
 - **Web search** -- powered by Brave Search
 - **Weather** -- current conditions for any city
+- **Medication tracking** -- register prescriptions with schedules and reminders
+- **Habit tracking** -- daily progress tracking (water, exercise, meditation, etc.)
+- **Emergency contacts** -- store and access emergency contacts quickly
+- **Document analysis** -- receive and analyze PDFs and files via Claude Vision
+- **Location handling** -- receive shared locations and suggest actions
+- **Translator** -- inline translation between any languages
+- **Exchange rate calculator** -- live currency conversion
+- **Smart dictation** -- generate formal or informal messages on demand
+- **News summary** -- search and summarize current news
 - **Configurable LLM model** -- Haiku for development, Sonnet for production
 - **Rebrandable** -- change the assistant name via `APP_BRAND_NAME` env var
-- **Onboarding flow** -- guided setup for new users
-- **Session management** -- automatic conversation grouping with 30-min expiry
 
 ---
 
@@ -51,6 +58,7 @@ Telegram
 |                                  |
 |  ScheduledJobProcessor           |  <-- executes reminders
 |  FactExtractionProcessor         |  <-- extracts facts from conversations
+|  DailyBriefingProcessor          |  <-- sends daily morning summaries
 +----------------------------------+
            |
            v
@@ -184,20 +192,38 @@ evva/
 |---|---|---|
 | `save_fact` | Persist a permanent fact about the user | -- |
 | `create_reminder` | Schedule a future reminder | Redis |
+| `create_note` | Create notes or lists | -- |
+| `get_notes` | View active notes and lists | -- |
+| `update_note` | Modify, check items, archive or delete notes | -- |
+| `save_contact` | Store a contact (name, phone, email, relationship) | -- |
+| `search_contacts` | Search contacts by name or relationship | -- |
+| `add_credit_card` | Register a credit card with cut-off and payment dates | -- |
+| `get_credit_cards` | View registered cards with balances | -- |
+| `record_transaction` | Log income or expense | -- |
+| `get_finance_summary` | Monthly financial summary by category | -- |
+| `get_recent_transactions` | View recent transactions | -- |
+| `create_savings_goal` | Create a savings goal with target amount | -- |
+| `get_savings_goals` | View savings progress | -- |
+| `connect_google` | Generate Google OAuth link (Calendar + Gmail) | Google OAuth |
+| `list_calendar_events` | List upcoming calendar events | Google OAuth |
+| `create_calendar_event` | Create a new calendar event | Google OAuth |
+| `list_emails` | List recent emails | Google OAuth |
+| `read_email` | Read full email content | Google OAuth |
+| `send_email` | Send an email from user's Gmail | Google OAuth |
+| `add_medication` | Register a medication with schedule | -- |
+| `get_medications` | View active medications | -- |
+| `create_habit` | Create a habit to track daily | -- |
+| `log_habit` | Log progress on a habit | -- |
+| `get_habit_progress` | View today's habit completion | -- |
+| `add_emergency_contact` | Register an emergency contact | -- |
+| `get_emergency_contacts` | View emergency contacts | -- |
+| `configure_daily_briefing` | Enable/disable daily morning summary | -- |
+| `translate` | Translate text between languages | -- |
+| `calculate_exchange_rate` | Live currency conversion | -- |
+| `draft_message` | Generate formal/informal messages | -- |
+| `summarize_news` | Search and summarize current news | `BRAVE_SEARCH_API_KEY` |
 | `web_search` | Up-to-date web search | `BRAVE_SEARCH_API_KEY` |
-| `get_weather` | Current weather for a city | -- (public API) |
-| `manage_notes` | Create, update, and list notes/lists | -- |
-| `manage_contacts` | Store and retrieve contacts | -- |
-| `google_calendar_list` | List upcoming calendar events | Google OAuth |
-| `google_calendar_create` | Create a new calendar event | Google OAuth |
-| `gmail_read` | Read recent emails | Google OAuth |
-| `gmail_search` | Search emails by query | Google OAuth |
-| `gmail_send` | Send an email | Google OAuth |
-| `manage_finances` | Track income, expenses, cards, goals | -- |
-| `transcribe_voice` | Transcribe voice notes to text | `GROQ_API_KEY` |
-| `analyze_photo` | Analyze an image with Claude Vision | -- |
-| `daily_briefing` | Generate a morning summary | -- |
-| `manage_session` | Reset or inspect conversation session | -- |
+| `get_weather` | Current weather for a city | -- |
 
 ---
 
