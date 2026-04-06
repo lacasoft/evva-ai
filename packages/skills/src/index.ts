@@ -21,6 +21,7 @@ export { emergencySkill } from "./emergency/index.js";
 // Communication
 export { calendarSkill } from "./calendar/index.js";
 export { gmailSkill } from "./gmail/index.js";
+export { emailCleanerSkill } from "./email-cleaner/index.js";
 
 // Music
 export { spotifySkill } from "./spotify/index.js";
@@ -53,6 +54,7 @@ import { healthSkill } from "./health/index.js";
 import { emergencySkill } from "./emergency/index.js";
 import { calendarSkill } from "./calendar/index.js";
 import { gmailSkill } from "./gmail/index.js";
+import { emailCleanerSkill } from "./email-cleaner/index.js";
 import { weatherSkill } from "./weather/index.js";
 import { newsSkill } from "./news/index.js";
 import { translatorSkill } from "./translator/index.js";
@@ -79,6 +81,7 @@ skillRegistry.register(healthSkill);
 skillRegistry.register(emergencySkill);
 skillRegistry.register(calendarSkill);
 skillRegistry.register(gmailSkill);
+skillRegistry.register(emailCleanerSkill);
 skillRegistry.register(weatherSkill);
 skillRegistry.register(newsSkill);
 skillRegistry.register(translatorSkill);
