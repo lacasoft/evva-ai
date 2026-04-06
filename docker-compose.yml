@@ -21,7 +21,7 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
-    command: redis-server --requirepass evva
+    command: redis-server --requirepass evva --appendonly yes --appendfsync everysec
     volumes:
       - redis_data:/data
     healthcheck:

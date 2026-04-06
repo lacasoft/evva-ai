@@ -197,6 +197,7 @@ function mapToUser(data: Record<string, unknown>): User {
     telegramFirstName: data.telegram_first_name as string | undefined,
     language: data.language as "es" | "en",
     timezone: data.timezone as string,
+    gender: (data.gender as "male" | "female" | "neutral") ?? "neutral",
     isActive: data.is_active as boolean,
     createdAt: new Date(data.created_at as string),
     updatedAt: new Date(data.updated_at as string),

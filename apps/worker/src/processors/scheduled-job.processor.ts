@@ -45,6 +45,74 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
     });
 
     this.logger.log("ScheduledJobProcessor iniciado");
+
+    // Cron: check DB for pending reminders every 60 seconds
+    // This catches reminders with delay > 24h (not in BullMQ)
+    setInterval(() => {
+      this.checkPendingReminders().catch((err) => {
+        this.logger.error(`Pending reminders check failed: ${err}`);
+      });
+    }, 60_000);
+  }
+
+  private async checkPendingReminders(): Promise<void> {
+    try {
+      const { query: dbQuery } = await import("@evva/database");
+      const rows = await dbQuery(
+        `SELECT * FROM scheduled_reminders
+         WHERE status = 'pending' AND trigger_at <= NOW()
+         LIMIT 10`,
+        [],
+      );
+
+      for (const row of rows) {
+        try {
+          const user = await findUserById(row.user_id as string);
+          if (!user) continue;
+
+          const prompt = buildProactiveMessagePrompt({
+            assistantName: row.assistant_name as string,
+            userFirstName: user.telegramFirstName,
+            reminderMessage: row.message as string,
+            additionalContext: row.additional_context as string | undefined,
+            timezone: user.timezone,
+            language: user.language,
+          });
+
+          const response = await generateResponse({
+            systemPrompt: prompt,
+            messages: [
+              { role: "user", content: "Genera el mensaje de recordatorio ahora." },
+            ],
+            maxTokens: 256,
+            temperature: 0.8,
+          });
+
+          const message = response.text?.trim();
+          if (message) {
+            await this.telegramSender.send(
+              Number(row.telegram_id),
+              message,
+            );
+          }
+
+          await dbQuery(
+            "UPDATE scheduled_reminders SET status = 'sent' WHERE id = $1",
+            [row.id],
+          );
+
+          this.logger.log(`DB reminder sent: ${row.id}`);
+        } catch (err) {
+          await dbQuery(
+            "UPDATE scheduled_reminders SET status = 'failed' WHERE id = $1",
+            [row.id],
+          );
+          this.logger.error(`DB reminder ${row.id} failed: ${err}`);
+        }
+      }
+    } catch {
+      // Table might not exist yet
+    }
   }
 
   async onModuleDestroy() {
@@ -99,6 +167,17 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
 
       // Enviar por Telegram
       await this.telegramSender.send(telegramId, message);
+
+      // Mark DB reminder as sent (if it exists)
+      try {
+        const { query: dbQuery } = await import("@evva/database");
+        await dbQuery(
+          "UPDATE scheduled_reminders SET status = 'sent' WHERE id = $1",
+          [job.data.jobId],
+        );
+      } catch {
+        // Non-blocking
+      }
 
       this.logger.log(
         `Proactive message sent to ${telegramId} — job ${job.id}`,

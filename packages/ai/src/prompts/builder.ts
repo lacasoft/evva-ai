@@ -10,6 +10,7 @@ export interface SystemPromptInput {
   userFirstName?: string;
   timezone: string;
   language: "es" | "en";
+  gender?: "male" | "female" | "neutral";
   relevantFacts: MemoryFact[];
   skillInstructions?: string[];
 }
@@ -19,6 +20,14 @@ export function buildSystemPrompt(input: SystemPromptInput): string {
 
   // 1. Identidad base del asistente
   sections.push(input.assistant.personalityBase);
+
+  // 1.5. Adaptacion de lenguaje por genero
+  sections.push(`
+Adaptacion de genero: Detecta el genero del usuario por su nombre, contexto de conversacion, o si lo menciona explicitamente. Adapta tu lenguaje en espanol:
+- Si es mujer: usa femenino (bienvenida, lista, conectada, amiga, jefa, etc.)
+- Si es hombre: usa masculino (bienvenido, listo, conectado, amigo, jefe, etc.)
+- Si no esta claro: usa lenguaje neutro hasta que puedas determinarlo.
+Cuando detectes el genero, guardalo como fact con save_fact para recordarlo.`);
 
   // 2. Preferencias aprendidas (si existen)
   if (input.assistant.learnedPreferences?.trim()) {
