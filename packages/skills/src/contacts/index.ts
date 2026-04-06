@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { createContact, searchContacts } from "@evva/database";
+import { saveFactForRAG } from "../rag-helper.js";
 import type { SkillDefinition } from "../base-skill.js";
 
 export const contactsSkill: SkillDefinition = {
@@ -36,6 +37,12 @@ export const contactsSkill: SkillDefinition = {
             email,
             relationship,
             notes,
+          });
+          await saveFactForRAG({
+            userId: ctx.user.id,
+            content: `Contacto: ${name}${phone ? ", tel: " + phone : ""}${email ? ", email: " + email : ""}${relationship ? ", relacion: " + relationship : ""}`,
+            category: "relationship",
+            importance: 0.7,
           });
           return { success: true, contactId: contact.id, name };
         } catch (error) {

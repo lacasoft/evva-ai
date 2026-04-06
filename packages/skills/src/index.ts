@@ -1,6 +1,7 @@
 export { SkillRegistry, skillRegistry } from "./registry.js";
 export type { SkillDefinition, SkillContext } from "./base-skill.js";
 export { buildRuntimeTools } from "./runtime-loader.js";
+export { saveFactForRAG } from "./rag-helper.js";
 
 // Core skills
 export { memorySkill } from "./memory/index.js";

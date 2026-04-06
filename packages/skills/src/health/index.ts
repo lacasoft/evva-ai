@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { saveFactForRAG } from "../rag-helper.js";
 import {
   createMedication,
   getUserMedications,
@@ -50,6 +51,12 @@ export const healthSkill: SkillDefinition = {
             frequency,
             times,
             notes,
+          });
+          await saveFactForRAG({
+            userId: ctx.user.id,
+            content: `Medicamento: ${name}${dosage ? ", dosis: " + dosage : ""}, frecuencia: ${frequency}, horarios: ${times.join(", ")}`,
+            category: "personal",
+            importance: 0.9,
           });
           return { success: true, medicationId: med.id, name, times };
         } catch (error) {
@@ -118,6 +125,12 @@ export const healthSkill: SkillDefinition = {
             name,
             targetPerDay: target_per_day,
             unit,
+          });
+          await saveFactForRAG({
+            userId: ctx.user.id,
+            content: `Habito: ${name}, meta diaria: ${target_per_day}${unit ? " " + unit : ""}`,
+            category: "goal",
+            importance: 0.7,
           });
           return {
             success: true,
