@@ -13,8 +13,8 @@
   <a href="https://github.com/lacasoft/evva-ai/releases"><img src="https://img.shields.io/github/v/release/lacasoft/evva-ai?style=flat-square" alt="Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
   <img src="https://img.shields.io/badge/node-%3E%3D22-green?style=flat-square" alt="Node" />
-  <img src="https://img.shields.io/badge/skills-22-purple?style=flat-square" alt="Skills" />
-  <img src="https://img.shields.io/badge/tools-42-orange?style=flat-square" alt="Tools" />
+  <img src="https://img.shields.io/badge/skills-25-purple?style=flat-square" alt="Skills" />
+  <img src="https://img.shields.io/badge/tools-50-orange?style=flat-square" alt="Tools" />
   <img src="https://img.shields.io/badge/channels-2-teal?style=flat-square" alt="Channels" />
 </p>
 
@@ -177,19 +177,24 @@ evva/
 │   ├── core/                    # Shared types, constants, and utils
 │   ├── database/                # PostgreSQL client (pg) and repositories
 │   ├── ai/                      # LLM (Claude), embeddings (Voyage), prompts
-│   └── skills/                  # Modular skill plugins (22 skills)
+│   └── skills/                  # Modular skill plugins (25 skills)
 │       └── src/
 │           ├── registry.ts           # Central skill registry
 │           ├── base-skill.ts         # SkillDefinition interface
+│           ├── rag-helper.ts         # Cross-skill RAG fact saving
+│           ├── runtime-loader.ts     # Runtime skill engine
 │           ├── memory/               # Persistent semantic memory
 │           ├── notes/                # Notes and lists
 │           ├── contacts/             # Contact management
+│           ├── data-management/      # Update and delete user data
 │           ├── reminders/            # Scheduled reminders
 │           ├── finance/              # Cards, transactions, savings
+│           ├── finance-security/     # Secret word protection
 │           ├── health/               # Medication and habit tracking
 │           ├── emergency/            # Emergency contacts
 │           ├── calendar/             # Google Calendar
 │           ├── gmail/                # Gmail (read, search, send)
+│           ├── spotify/              # Spotify integration
 │           ├── weather/              # Weather lookup
 │           ├── search/               # Web search (Brave)
 │           ├── news/                 # News summary
@@ -201,7 +206,7 @@ evva/
 │           ├── recipes/              # Recipe suggestions
 │           ├── voice/                # Voice note transcription
 │           ├── vision/               # Photo and document analysis
-│           └── spotify/              # Spotify integration
+│           └── skill-creator/        # Self-extending runtime skills
 │
 └── docs/                        # Setup guides and documentation
 ```
@@ -334,6 +339,30 @@ The skill is automatically available to the LLM. No other files need to change.
 | `translate` | Translate text between languages | -- |
 | `calculate_exchange_rate` | Live currency conversion | -- |
 | `draft_message` | Generate formal/informal messages | -- |
+| `save_birthday` | Save a birthday date | -- |
+| `check_upcoming_birthdays` | Find upcoming birthdays | -- |
+| `suggest_recipes` | Suggest recipes from grocery list | -- |
+
+### Media
+
+| Tool | Description | Requires |
+|:--|:--|:--|
+| `connect_spotify` | Generate Spotify OAuth link | Spotify OAuth |
+| `now_playing` | Show currently playing track | Spotify OAuth |
+| `recent_tracks` | Show recently played tracks | Spotify OAuth |
+| `top_tracks` | Show user's top tracks | Spotify OAuth |
+| `search_music` | Search Spotify catalog | Spotify OAuth |
+
+### Data Management
+
+| Tool | Description | Requires |
+|:--|:--|:--|
+| `update_user_data` | Update contacts, emergency, cards, medications, habits | -- |
+| `delete_user_data` | Delete contacts, facts, medications, habits | -- |
+| `set_finance_secret` | Set a secret word for finance protection | -- |
+| `verify_finance_secret` | Verify secret word before financial operations | -- |
+| `create_runtime_skill` | Create a custom skill via conversation | -- |
+| `list_runtime_skills` | List user-created custom skills | -- |
 
 ---
 
