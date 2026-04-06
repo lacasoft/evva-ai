@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
+import { query } from "@evva/database";
 import {
   QUEUE_NAMES,
   type ScheduledJobPayload,
@@ -68,29 +69,48 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       throw new Error("No se puede programar un recordatorio en el pasado");
     }
 
-    const payload: ScheduledJobPayload = {
-      jobId,
-      userId: params.userId,
-      telegramId: params.telegramId,
-      type: "reminder",
-      context: {
-        message: params.message,
-        assistantName: params.assistantName,
-        additionalContext: params.additionalContext,
-      },
-    };
+    // Always persist to DB (survives Redis restarts, no delay limits)
+    await query(
+      `INSERT INTO scheduled_reminders (id, user_id, telegram_id, message, assistant_name, additional_context, trigger_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        jobId,
+        params.userId,
+        params.telegramId,
+        params.message,
+        params.assistantName,
+        params.additionalContext ?? null,
+        params.triggerAt.toISOString(),
+      ],
+    );
 
-    await this.scheduledJobsQueue.add("reminder", payload, {
-      jobId,
-      delay,
-      attempts: 3,
-      backoff: { type: "exponential", delay: 5000 },
-      removeOnComplete: { age: 60 * 60 * 24 }, // Mantener 24h después de completar
-      removeOnFail: { age: 60 * 60 * 24 * 7 }, // Mantener 7 días si falla
-    });
+    // For short delays (<24h), also use BullMQ for immediate delivery
+    const MAX_BULLMQ_DELAY = 24 * 60 * 60 * 1000; // 24 hours
+    if (delay <= MAX_BULLMQ_DELAY) {
+      const payload: ScheduledJobPayload = {
+        jobId,
+        userId: params.userId,
+        telegramId: params.telegramId,
+        type: "reminder",
+        context: {
+          message: params.message,
+          assistantName: params.assistantName,
+          additionalContext: params.additionalContext,
+        },
+      };
+
+      await this.scheduledJobsQueue.add("reminder", payload, {
+        jobId,
+        delay,
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: { age: 60 * 60 * 24 },
+        removeOnFail: { age: 60 * 60 * 24 * 7 },
+      });
+    }
 
     this.logger.log(
-      `Reminder scheduled: ${jobId} for user ${params.userId} at ${params.triggerAt.toISOString()}`,
+      `Reminder scheduled: ${jobId} for user ${params.userId} at ${params.triggerAt.toISOString()} (delay: ${Math.round(delay / 60000)}min, bullmq: ${delay <= MAX_BULLMQ_DELAY})`,
     );
 
     return jobId;

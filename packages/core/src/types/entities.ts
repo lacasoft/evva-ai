@@ -8,6 +8,7 @@ export interface User {
   telegramFirstName?: string;
   language: "es" | "en";
   timezone: string;
+  gender: "male" | "female" | "neutral";
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
@@ -317,11 +318,14 @@ export interface OnboardingState {
   updatedAt: Date;
 }
 
+export type UserGender = "male" | "female" | "neutral";
+
 export interface OnboardingData {
   assistantName: string;
   userFirstName: string;
   userName: string;
   ageRange: AgeRange;
+  gender: UserGender;
   interests: string[];
   timezone: string;
   language: "es" | "en";

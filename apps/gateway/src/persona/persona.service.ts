@@ -30,6 +30,7 @@ export class PersonaService {
       userFirstName: params.user.telegramFirstName,
       timezone: params.user.timezone,
       language: params.user.language,
+      gender: params.user.gender,
       relevantFacts,
       skillInstructions: params.skillInstructions,
     });
