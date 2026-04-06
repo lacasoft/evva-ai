@@ -37,6 +37,12 @@ const envSchema = z.object({
   // Redis (para BullMQ)
   REDIS_URL: z.string().default("redis://localhost:6379"),
 
+  // OpenAI — TTS voice responses (https://platform.openai.com)
+  OPENAI_API_KEY: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+
   // Groq — transcripción de voz con Whisper (https://console.groq.com)
   GROQ_API_KEY: z
     .string()

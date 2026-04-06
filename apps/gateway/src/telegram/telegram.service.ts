@@ -6,7 +6,8 @@ import {
 } from "@nestjs/common";
 import { Bot, type Context } from "grammy";
 import { LIMITS } from "@evva/core";
-import { transcribeAudio } from "@evva/ai";
+import { transcribeAudio, textToSpeech } from "@evva/ai";
+import { InputFile } from "grammy";
 import { UsersService } from "../users/users.service.js";
 import { ConversationService } from "../conversation/conversation.service.js";
 import { OnboardingService } from "../conversation/onboarding.service.js";
@@ -170,7 +171,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         telegramMessageId: ctx.message?.message_id,
       });
 
-      await this.sendMessage(telegramId, result.reply);
+      await this.sendReply(telegramId, result.reply);
     } catch (error) {
       this.logger.error(`Error handling message from ${telegramId}: ${error}`);
       await this.sendMessage(
@@ -246,7 +247,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         telegramMessageId: ctx.message?.message_id,
       });
 
-      await this.sendMessage(telegramId, result.reply);
+      await this.sendReply(telegramId, result.reply);
     } catch (error) {
       this.logger.error(`Error handling photo from ${telegramId}: ${error}`);
       await this.sendMessage(
@@ -322,7 +323,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           imageData: buffer,
           telegramMessageId: ctx.message?.message_id,
         });
-        await this.sendMessage(telegramId, result.reply);
+        await this.sendReply(telegramId, result.reply);
       } else {
         // Para otros archivos de texto, leer como string
         const textContent = buffer.toString("utf-8").slice(0, 4000);
@@ -332,7 +333,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           incomingText: `El usuario envió un archivo "${fileName}". Contenido:\n\n${textContent}`,
           telegramMessageId: ctx.message?.message_id,
         });
-        await this.sendMessage(telegramId, result.reply);
+        await this.sendReply(telegramId, result.reply);
       }
     } catch (error) {
       this.logger.error(`Error handling document from ${telegramId}: ${error}`);
@@ -383,7 +384,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         telegramMessageId: ctx.message?.message_id,
       });
 
-      await this.sendMessage(telegramId, result.reply);
+      await this.sendReply(telegramId, result.reply);
     } catch (error) {
       this.logger.error(`Error handling location from ${telegramId}: ${error}`);
     }
@@ -469,7 +470,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
         telegramMessageId: ctx.message?.message_id,
       });
 
-      await this.sendMessage(telegramId, result.reply);
+      await this.sendReply(telegramId, result.reply);
     } catch (error) {
       this.logger.error(`Error handling voice from ${telegramId}: ${error}`);
 
@@ -529,7 +530,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           "Muéstrame un resumen de lo que recuerdas sobre mí. Sé conciso.",
       });
 
-      await this.sendMessage(telegramId, result.reply);
+      await this.sendReply(telegramId, result.reply);
     } catch (error) {
       this.logger.error(`Error handling /memoria: ${error}`);
     }
@@ -611,6 +612,44 @@ Puedes enviarme audios y los proceso como texto.
       }
     } catch (error) {
       this.logger.error(`Failed to send message to ${telegramId}: ${error}`);
+    }
+  }
+
+  /**
+   * Send a reply — detects voice response markers and sends audio.
+   * If the reply contains the voice_response tool result, generates TTS audio.
+   */
+  async sendReply(
+    telegramId: number,
+    text: string,
+    language: "es" | "en" = "es",
+  ): Promise<void> {
+    // Check if the LLM used the respond_with_voice tool
+    // The tool result contains "voice_response" marker in the text
+    if (text.includes("[VOICE]")) {
+      const voiceText = text.replace("[VOICE]", "").trim();
+      await this.sendVoice(telegramId, voiceText, language);
+      return;
+    }
+
+    await this.sendMessage(telegramId, text);
+  }
+
+  async sendVoice(
+    telegramId: number,
+    text: string,
+    language: "es" | "en" = "es",
+  ): Promise<void> {
+    try {
+      const { audio } = await textToSpeech({ text, language });
+      await this.bot.api.sendVoice(
+        telegramId,
+        new InputFile(audio, "voice.ogg"),
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send voice: ${error}`);
+      // Fallback to text
+      await this.sendMessage(telegramId, text);
     }
   }
 

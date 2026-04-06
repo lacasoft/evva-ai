@@ -38,6 +38,7 @@ export { searchSkill } from "./search/index.js";
 export { skillCreatorSkill } from "./skill-creator/index.js";
 export { birthdaysSkill } from "./birthdays/index.js";
 export { recipesSkill } from "./recipes/index.js";
+export { ttsSkill } from "./tts/index.js";
 
 // Register all skills
 import { skillRegistry } from "./registry.js";
@@ -64,6 +65,7 @@ import { searchSkill } from "./search/index.js";
 import { skillCreatorSkill } from "./skill-creator/index.js";
 import { birthdaysSkill } from "./birthdays/index.js";
 import { recipesSkill } from "./recipes/index.js";
+import { ttsSkill } from "./tts/index.js";
 import { spotifySkill } from "./spotify/index.js";
 
 skillRegistry.register(memorySkill);
@@ -89,4 +91,5 @@ skillRegistry.register(searchSkill);
 skillRegistry.register(skillCreatorSkill);
 skillRegistry.register(birthdaysSkill);
 skillRegistry.register(recipesSkill);
+skillRegistry.register(ttsSkill);
 skillRegistry.register(spotifySkill);
