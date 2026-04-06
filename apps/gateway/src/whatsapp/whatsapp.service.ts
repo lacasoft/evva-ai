@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { transcribeAudio } from "@evva/ai";
+import { transcribeAudio, textToSpeech } from "@evva/ai";
 import { UsersService } from "../users/users.service.js";
 import { ConversationService } from "../conversation/conversation.service.js";
 import { OnboardingService } from "../conversation/onboarding.service.js";
@@ -126,7 +126,7 @@ export class WhatsAppService {
       incomingText: text,
     });
 
-    await this.sendMessage(from, result.reply);
+    await this.sendReply(from, result.reply);
   }
 
   // ============================================================
@@ -187,7 +187,7 @@ export class WhatsAppService {
       incomingText: transcribedText,
     });
 
-    await this.sendMessage(from, result.reply);
+    await this.sendReply(from, result.reply);
   }
 
   // ============================================================
@@ -235,7 +235,7 @@ export class WhatsAppService {
       imageData,
     });
 
-    await this.sendMessage(from, result.reply);
+    await this.sendReply(from, result.reply);
   }
 
   // ============================================================
@@ -287,7 +287,7 @@ export class WhatsAppService {
           message.document?.caption || `Analiza este documento: ${fileName}`,
         imageData: buffer,
       });
-      await this.sendMessage(from, result.reply);
+      await this.sendReply(from, result.reply);
     } else {
       const textContent = buffer.toString("utf-8").slice(0, 4000);
       const result = await this.conversationService.processMessage({
@@ -295,7 +295,7 @@ export class WhatsAppService {
         assistant,
         incomingText: `El usuario envi\u00f3 un archivo "${fileName}". Contenido:\n\n${textContent}`,
       });
-      await this.sendMessage(from, result.reply);
+      await this.sendReply(from, result.reply);
     }
   }
 
@@ -331,7 +331,7 @@ export class WhatsAppService {
       incomingText: `El usuario comparti\u00f3 su ubicaci\u00f3n: latitud ${location.latitude}, longitud ${location.longitude}. Preg\u00fantale si quiere que la guarde, la comparta con alguien, o si necesita ayuda con algo cercano.`,
     });
 
-    await this.sendMessage(from, result.reply);
+    await this.sendReply(from, result.reply);
   }
 
   // ============================================================
@@ -496,15 +496,72 @@ export class WhatsAppService {
 
   private markdownToWhatsApp(text: string): string {
     return text
-      // **bold** → *bold*
       .replace(/\*\*(.+?)\*\*/g, "*$1*")
-      // __bold__ → *bold*
       .replace(/__(.+?)__/g, "*$1*")
-      // ~~strike~~ → ~strike~
       .replace(/~~(.+?)~~/g, "~$1~")
-      // Remove markdown headers (## Title → Title)
       .replace(/^#{1,6}\s+/gm, "")
-      // Remove markdown links [text](url) → text (url)
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  }
+
+  /**
+   * Send reply — detects [VOICE] marker and sends audio instead of text.
+   */
+  async sendReply(to: string, text: string, language: "es" | "en" = "es"): Promise<void> {
+    if (text.includes("[VOICE]")) {
+      const voiceText = text.replace("[VOICE]", "").trim();
+      await this.sendVoice(to, voiceText, language);
+      return;
+    }
+    await this.sendMessage(to, text);
+  }
+
+  async sendVoice(to: string, text: string, language: "es" | "en" = "es"): Promise<void> {
+    const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    if (!accessToken || !phoneNumberId) return;
+
+    try {
+      const { audio } = await textToSpeech({ text, language });
+
+      // Upload audio to WhatsApp media API
+      const formData = new FormData();
+      formData.append("file", new Blob([audio], { type: "audio/ogg" }), "voice.ogg");
+      formData.append("messaging_product", "whatsapp");
+      formData.append("type", "audio/ogg");
+
+      const uploadRes = await fetch(
+        `${GRAPH_API_BASE}/${phoneNumberId}/media`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+          body: formData,
+        },
+      );
+
+      if (!uploadRes.ok) {
+        throw new Error(`Media upload failed: ${uploadRes.status}`);
+      }
+
+      const { id: mediaId } = (await uploadRes.json()) as { id: string };
+
+      // Send audio message
+      await fetch(`${GRAPH_API_BASE}/${phoneNumberId}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to,
+          type: "audio",
+          audio: { id: mediaId },
+        }),
+      });
+    } catch (error) {
+      this.logger.error(`Failed to send voice via WhatsApp: ${error}`);
+      // Fallback to text
+      await this.sendMessage(to, text);
+    }
   }
 }
