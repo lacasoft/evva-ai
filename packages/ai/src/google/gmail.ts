@@ -228,3 +228,158 @@ function decodeBase64Url(data: string): string {
   const base64 = data.replace(/-/g, "+").replace(/_/g, "/");
   return Buffer.from(base64, "base64").toString("utf-8");
 }
+
+// ============================================================
+// Analyze email for unsubscribe options
+// ============================================================
+
+export interface UnsubscribeInfo {
+  emailId: string;
+  from: string;
+  subject: string;
+  unsubscribeUrl?: string;
+  unsubscribeEmail?: string;
+  hasUnsubscribe: boolean;
+}
+
+export async function getEmailUnsubscribeInfo(
+  accessToken: string,
+  messageId: string,
+): Promise<UnsubscribeInfo | null> {
+  const response = await fetch(
+    `${GMAIL_API}/users/me/messages/${messageId}?format=full&metadataHeaders=List-Unsubscribe&metadataHeaders=From&metadataHeaders=Subject`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as {
+    id: string;
+    payload: {
+      headers: Array<{ name: string; value: string }>;
+      body?: { data?: string };
+      parts?: Array<{ mimeType: string; body?: { data?: string } }>;
+    };
+  };
+
+  const headers = data.payload.headers;
+  const getHeader = (name: string) =>
+    headers.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value ?? "";
+
+  const listUnsubscribe = getHeader("List-Unsubscribe");
+
+  let unsubscribeUrl: string | undefined;
+  let unsubscribeEmail: string | undefined;
+
+  // Parse List-Unsubscribe header: <https://...>, <mailto:...>
+  if (listUnsubscribe) {
+    const urlMatch = listUnsubscribe.match(/<(https?:\/\/[^>]+)>/);
+    if (urlMatch) unsubscribeUrl = urlMatch[1];
+
+    const mailtoMatch = listUnsubscribe.match(/<mailto:([^>]+)>/);
+    if (mailtoMatch) unsubscribeEmail = mailtoMatch[1];
+  }
+
+  // If no header, try to find unsubscribe link in body
+  if (!unsubscribeUrl) {
+    let body = "";
+    if (data.payload.parts) {
+      const htmlPart = data.payload.parts.find((p) => p.mimeType === "text/html");
+      if (htmlPart?.body?.data) body = decodeBase64Url(htmlPart.body.data);
+    } else if (data.payload.body?.data) {
+      body = decodeBase64Url(data.payload.body.data);
+    }
+
+    // Common unsubscribe link patterns
+    const patterns = [
+      /href="(https?:\/\/[^"]*unsub[^"]*?)"/i,
+      /href="(https?:\/\/[^"]*opt[_-]?out[^"]*?)"/i,
+      /href="(https?:\/\/[^"]*desuscri[^"]*?)"/i,
+      /href="(https?:\/\/[^"]*baja[^"]*?)"/i,
+      /href="(https?:\/\/[^"]*remove[^"]*?)"/i,
+      /href="(https?:\/\/[^"]*preferences[^"]*?)"/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = body.match(pattern);
+      if (match) {
+        unsubscribeUrl = match[1];
+        break;
+      }
+    }
+  }
+
+  return {
+    emailId: data.id,
+    from: getHeader("From"),
+    subject: getHeader("Subject"),
+    unsubscribeUrl,
+    unsubscribeEmail,
+    hasUnsubscribe: !!(unsubscribeUrl || unsubscribeEmail),
+  };
+}
+
+/**
+ * List promotional/newsletter emails with unsubscribe info.
+ */
+export async function listPromotionalEmails(
+  accessToken: string,
+  maxResults = 20,
+): Promise<UnsubscribeInfo[]> {
+  // Search for promotional emails (Gmail category:promotions)
+  const response = await fetch(
+    `${GMAIL_API}/users/me/messages?maxResults=${maxResults}&q=category:promotions OR label:promotions OR unsubscribe`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+
+  if (!response.ok) return [];
+
+  const data = (await response.json()) as {
+    messages?: Array<{ id: string }>;
+  };
+
+  if (!data.messages || data.messages.length === 0) return [];
+
+  // Get unsubscribe info for each (limit to 10 to avoid rate limits)
+  const results = await Promise.all(
+    data.messages.slice(0, 10).map((msg) =>
+      getEmailUnsubscribeInfo(accessToken, msg.id),
+    ),
+  );
+
+  return results.filter((r): r is UnsubscribeInfo => r !== null && r.hasUnsubscribe);
+}
+
+/**
+ * Execute unsubscribe by visiting the URL.
+ */
+export async function executeUnsubscribe(
+  unsubscribeUrl: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(unsubscribeUrl, {
+      method: "GET",
+      redirect: "follow",
+      signal: AbortSignal.timeout(10_000),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; EvvaBot/1.0)",
+      },
+    });
+
+    // Most unsubscribe pages return 200 on success
+    // Some redirect to a confirmation page
+    if (response.ok || response.status === 302 || response.status === 301) {
+      return { success: true };
+    }
+
+    return {
+      success: false,
+      error: `HTTP ${response.status}`,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+}
