@@ -13,13 +13,13 @@
   <a href="https://github.com/lacasoft/evva-ai/releases"><img src="https://img.shields.io/github/v/release/lacasoft/evva-ai?style=flat-square" alt="Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
   <img src="https://img.shields.io/badge/node-%3E%3D22-green?style=flat-square" alt="Node" />
-  <img src="https://img.shields.io/badge/skills-22-purple?style=flat-square" alt="Skills" />
-  <img src="https://img.shields.io/badge/tools-42-orange?style=flat-square" alt="Tools" />
+  <img src="https://img.shields.io/badge/skills-25-purple?style=flat-square" alt="Skills" />
+  <img src="https://img.shields.io/badge/tools-50-orange?style=flat-square" alt="Tools" />
   <img src="https://img.shields.io/badge/channels-2-teal?style=flat-square" alt="Channels" />
 </p>
 
 <p align="center">
-  <a href="README.md">Read in English</a> · <a href="docs/SETUP.es.md">Guia de Setup</a> · <a href="https://github.com/lacasoft/evva-ai/releases">Releases</a>
+  <a href="README.md">Read in English</a> &middot; <a href="docs/SETUP.es.md">Guia de Instalacion</a> &middot; <a href="https://github.com/lacasoft/evva-ai/releases">Releases</a>
 </p>
 
 <p align="center">
@@ -35,73 +35,30 @@
 ## Caracteristicas
 
 | | |
-|---|---|
-| :brain: **Memoria semantica persistente** -- recuerda todo lo que le cuentas | :bell: **Recordatorios y mensajes proactivos** -- te avisa en el momento justo |
-| :memo: **Notas y listas** -- compras, pendientes, wishlists y mas | :busts_in_silhouette: **Gestion de contactos** -- guarda personas y relaciones |
-| :calendar: **Google Calendar** -- consulta y crea eventos | :envelope: **Gmail** -- lee, busca y envia correos |
-| :credit_card: **Finanzas personales** -- tarjetas, ingresos/gastos, metas de ahorro | :microphone: **Notas de voz** -- transcripcion con Whisper via Groq |
-| :camera: **Analisis de fotos** -- Claude Vision para entender imagenes | :sunrise: **Resumen diario** -- briefing matutino proactivo |
-| :mag: **Busqueda web** -- resultados actualizados via Brave Search | :cloud: **Clima** -- condiciones actuales de cualquier ciudad |
-| :pill: **Seguimiento de medicamentos** -- horarios y dosis | :chart_with_upwards_trend: **Seguimiento de habitos** -- agua, ejercicio, meditacion |
-| :sos: **Contactos de emergencia** -- acceso rapido | :page_facing_up: **Analisis de documentos** -- PDFs y archivos via Claude Vision |
-| :globe_with_meridians: **Traductor** -- traduccion entre idiomas | :currency_exchange: **Tipo de cambio** -- conversion de divisas en tiempo real |
-| :pencil2: **Dictado inteligente** -- mensajes formales o informales | :newspaper: **Resumen de noticias** -- busca y resume noticias actuales |
-| :musical_note: **Spotify** -- lo que suena, historial, top tracks | :iphone: **WhatsApp** -- el mismo asistente en WhatsApp Business API |
-| :birthday: **Cumpleanos automaticos** -- detecta y recuerda cumpleanos | :stew: **Recetas inteligentes** -- sugerencias segun tu lista del super |
-| :zap: **Cache Redis** -- optimiza tokens con cache de OAuth y contexto | :gear: **Modelo LLM configurable** -- Haiku para dev, Sonnet para prod |
-| :label: **Rebrandeable** -- cambia el nombre con `APP_BRAND_NAME` | :satellite: **Multi-canal** -- Telegram + WhatsApp con experiencia identica |
+|:--|:--|
+| **Brain** Memoria semantica persistente | **Bell** Recordatorios programados y mensajes proactivos |
+| **Note** Notas, listas y tareas | **Person** Gestion de contactos |
+| **Calendar** Integracion con Google Calendar | **Mail** Gmail: leer, buscar y enviar |
+| **Dollar** Finanzas personales y metas de ahorro | **Mic** Transcripcion de notas de voz (Groq Whisper) |
+| **Camera** Analisis de fotos y documentos (Claude Vision) | **Sun** Resumen proactivo diario |
+| **Globe** Busqueda web (Brave) y resumenes de noticias | **Cloud** Clima para cualquier ciudad |
+| **Pill** Seguimiento de medicamentos y habitos | **Phone** Contactos de emergencia |
+| **Language** Traduccion y dictado inteligente | **Music** Integracion con Spotify |
+| **Exchange** Conversion de divisas en tiempo real | **Birthday** Recordatorios proactivos de cumpleanos |
+| **Recipe** Sugerencias de recetas desde listas de compras | **WhatsApp** Multi-canal (Telegram + WhatsApp) |
 
 ---
 
-## Arquitectura
-
-```
-Telegram / WhatsApp
-        |
-        v
-+----------------------------------+
-|  Gateway (NestJS)                |
-|                                  |
-|  TelegramModule                  |  <- recibe mensajes, responde
-|  ConversationModule              |  <- orquesta el loop del agente
-|  MemoryModule                    |  <- RAG sobre facts del usuario
-|  PersonaModule                   |  <- system prompt dinamico
-|  ToolsModule                     |  <- web_search, reminders, etc.
-|  SchedulerModule                 |  <- encola jobs en BullMQ
-|  UsersModule                     |  <- CRUD de usuarios y asistentes
-+----------------------------------+
-           | BullMQ (Redis)
-           v
-+----------------------------------+
-|  Worker (NestJS)                 |
-|                                  |
-|  ScheduledJobProcessor           |  <- ejecuta recordatorios
-|  FactExtractionProcessor         |  <- extrae facts de conversaciones
-|  DailyBriefingProcessor          |  <- envia resumenes diarios
-+----------------------------------+
-           |
-           v
-+----------------------------------+
-|  PostgreSQL + pgvector           |
-|                                  |
-|  users, assistant_config         |
-|  messages, memory_facts          |
-|  onboarding_state                |
-+----------------------------------+
-```
-
----
-
-## Stack tecnologico
+## Stack Tecnologico
 
 | Capa | Tecnologia |
-|---|---|
+|:--|:--|
 | Framework | NestJS + TypeScript |
-| Bot | grammy |
+| Bot | grammY |
 | LLM | Claude Sonnet (Vercel AI SDK) |
 | Embeddings | Voyage AI (voyage-3-lite, 512 dims) |
 | Base de datos | PostgreSQL + pgvector |
-| Cola de tareas | BullMQ + Redis |
+| Cola | BullMQ + Redis |
 | Transcripcion | Groq (Whisper) |
 | Vision | Claude Vision |
 | Busqueda | Brave Search API |
@@ -109,16 +66,52 @@ Telegram / WhatsApp
 
 ---
 
-## Inicio rapido
+## Arquitectura
+
+Evva sigue una separacion gateway/worker. El gateway maneja todas las interacciones con el usuario -- recibiendo mensajes, orquestando el ciclo del agente LLM y devolviendo respuestas. El trabajo pesado o programado (recordatorios, extraccion de hechos, resumenes diarios) se delega a un worker asincrono via BullMQ, manteniendo al bot responsivo en todo momento.
+
+```
+Telegram / WhatsApp
+        |
+        v
++-----------------------------------+
+|  Gateway (NestJS)                 |
+|                                   |
+|  TelegramModule    -- recibe mensajes, envia respuestas
+|  ConversationModule -- orquesta el ciclo del agente
+|  MemoryModule      -- RAG sobre hechos del usuario
+|  PersonaModule     -- prompt de sistema dinamico
+|  ToolsModule       -- web_search, reminders, etc.
+|  SchedulerModule   -- encola trabajos via BullMQ
+|  UsersModule       -- CRUD de usuarios y asistente
++-----------------------------------+
+        | BullMQ (Redis)
+        v
++-----------------------------------+
+|  Worker (NestJS)                  |
+|                                   |
+|  ScheduledJobProcessor   -- ejecuta recordatorios
+|  FactExtractionProcessor -- extrae hechos de conversaciones
+|  DailyBriefingProcessor  -- envia resumenes matutinos
++-----------------------------------+
+        |
+        v
++-----------------------------------+
+|  PostgreSQL + pgvector            |
+|                                   |
+|  users, assistant_config,         |
+|  messages, memory_facts,          |
+|  onboarding_state                 |
++-----------------------------------+
+```
+
+---
+
+## Inicio Rapido
 
 Para instrucciones detalladas paso a paso, consulta [`docs/SETUP.es.md`](docs/SETUP.es.md).
 
-### Prerrequisitos
-
-- Node.js >= 22.0.0
-- pnpm >= 9.0.0
-- PostgreSQL con extension pgvector
-- Redis
+**Requisitos previos:** Node.js >= 22, pnpm >= 9, PostgreSQL con pgvector, Redis.
 
 ### Opcion A -- Docker Compose (recomendado)
 
@@ -126,15 +119,15 @@ Para instrucciones detalladas paso a paso, consulta [`docs/SETUP.es.md`](docs/SE
 git clone https://github.com/lacasoft/evva-ai.git
 cd evva-ai
 cp .env.example .env
-# Edita .env con tus credenciales (ver .env.example para todas las variables)
+# Edita .env con tus credenciales (consulta .env.example para todas las variables)
 
 docker compose up
 ```
 
-Listo. PostgreSQL, Redis, migraciones, gateway y worker arrancan automaticamente.
+PostgreSQL, Redis, migraciones, gateway y worker inician automaticamente.
 
 <details>
-<summary><strong>Opcion B -- Setup manual</strong></summary>
+<summary><strong>Opcion B -- Instalacion manual</strong></summary>
 
 ```bash
 git clone https://github.com/lacasoft/evva-ai.git
@@ -148,63 +141,97 @@ pnpm db:migrate
 # Terminal 1 -- Gateway (bot de Telegram)
 pnpm dev:gateway
 
-# Terminal 2 -- Worker (procesadores de BullMQ)
+# Terminal 2 -- Worker (procesadores BullMQ)
 pnpm dev:worker
 ```
 
-El bot arranca en modo **long polling** en desarrollo. No necesitas configurar webhooks.
+El bot inicia en modo **long polling** -- no se requiere configuracion de webhook para desarrollo local.
 
 </details>
 
 ---
 
-## Directorio de skills
+## Estructura del Proyecto
 
 ```
-packages/skills/src/
-├── registry.ts            # Registro central de skills
-├── base-skill.ts          # Interfaz SkillDefinition
-├── memory/                # Memoria semantica persistente
-├── notes/                 # Notas y listas
-├── contacts/              # Gestion de contactos
-├── reminders/             # Recordatorios programados
-├── finance/               # Finanzas personales (tarjetas, transacciones, ahorro)
-├── health/                # Seguimiento de medicamentos y habitos
-├── emergency/             # Contactos de emergencia
-├── calendar/              # Google Calendar
-├── gmail/                 # Gmail (leer, buscar, enviar)
-├── weather/               # Clima
-├── search/                # Busqueda web (Brave)
-├── news/                  # Resumen de noticias
-├── translator/            # Traduccion entre idiomas
-├── exchange/              # Tipo de cambio de divisas
-├── dictation/             # Dictado inteligente de mensajes
-├── briefing/              # Resumen diario proactivo
-├── voice/                 # Transcripcion de notas de voz
-└── vision/                # Analisis de fotos y documentos
+evva/
+├── apps/
+│   ├── gateway/                 # App principal -- bot de Telegram + API
+│   │   └── src/
+│   │       ├── telegram/             # Manejador de mensajes de Telegram
+│   │       ├── conversation/         # Ciclo del agente + onboarding
+│   │       ├── memory/              # Busqueda y almacenamiento de hechos
+│   │       ├── persona/             # Construccion del prompt de sistema
+│   │       ├── tools/               # Herramientas disponibles para el LLM
+│   │       ├── scheduler/           # Programacion de trabajos BullMQ
+│   │       ├── users/               # CRUD de usuarios y asistente
+│   │       ├── health/              # Endpoints de health check
+│   │       └── config/              # Validacion de variables de entorno
+│   │
+│   └── worker/                  # Worker BullMQ -- trabajos asincronos
+│       └── src/
+│           ├── processors/           # ScheduledJob + FactExtraction
+│           └── handlers/             # TelegramSender
+│
+├── packages/
+│   ├── core/                    # Tipos, constantes y utilidades compartidas
+│   ├── database/                # Cliente PostgreSQL (pg) y repositorios
+│   ├── ai/                      # LLM (Claude), embeddings (Voyage), prompts
+│   └── skills/                  # Plugins de skills modulares (25 skills)
+│       └── src/
+│           ├── registry.ts           # Registro central de skills
+│           ├── base-skill.ts         # Interfaz SkillDefinition
+│           ├── rag-helper.ts         # Guardado de hechos RAG entre skills
+│           ├── runtime-loader.ts     # Motor de skills en tiempo de ejecucion
+│           ├── memory/               # Memoria semantica persistente
+│           ├── notes/                # Notas y listas
+│           ├── contacts/             # Gestion de contactos
+│           ├── data-management/      # Actualizar y eliminar datos de usuario
+│           ├── reminders/            # Recordatorios programados
+│           ├── finance/              # Tarjetas, transacciones, ahorros
+│           ├── finance-security/     # Proteccion con palabra secreta
+│           ├── health/               # Seguimiento de medicamentos y habitos
+│           ├── emergency/            # Contactos de emergencia
+│           ├── calendar/             # Google Calendar
+│           ├── gmail/                # Gmail (leer, buscar, enviar)
+│           ├── spotify/              # Integracion con Spotify
+│           ├── weather/              # Consulta de clima
+│           ├── search/               # Busqueda web (Brave)
+│           ├── news/                 # Resumen de noticias
+│           ├── translator/           # Traduccion de idiomas
+│           ├── exchange/             # Tasas de cambio de divisas
+│           ├── dictation/            # Redaccion inteligente de mensajes
+│           ├── briefing/             # Resumen proactivo diario
+│           ├── birthdays/            # Recordatorios de cumpleanos
+│           ├── recipes/              # Sugerencias de recetas
+│           ├── voice/                # Transcripcion de notas de voz
+│           ├── vision/               # Analisis de fotos y documentos
+│           └── skill-creator/        # Skills en tiempo de ejecucion auto-extensibles
+│
+└── docs/                        # Guias de instalacion y documentacion
 ```
 
 <details>
-<summary><strong>Agregar un nuevo skill</strong></summary>
+<summary><strong>Agregar un Nuevo Skill</strong></summary>
 
-Cada skill es un modulo independiente:
+Cada skill es un modulo independiente. Para agregar uno nuevo:
 
 ```typescript
-// packages/skills/src/mi-skill/index.ts
+// packages/skills/src/my-skill/index.ts
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { SkillDefinition } from '../base-skill.js';
 
-export const miSkill: SkillDefinition = {
-  name: 'mi-skill',
-  description: 'Lo que hace este skill',
+export const mySkill: SkillDefinition = {
+  name: 'my-skill',
+  description: 'What this skill does',
   category: 'utility',
   forProfiles: ['young', 'adult', 'senior'],
-  requiredEnv: ['MI_API_KEY'],  // opcional
+  requiredEnv: ['MY_API_KEY'],  // optional
 
   buildTools: (ctx) => ({
-    mi_tool: tool({
-      description: 'Descripcion para el LLM',
+    my_tool: tool({
+      description: 'Tool description for the LLM',
       parameters: z.object({ input: z.string() }),
       execute: async ({ input }) => {
         return { success: true, result: input };
@@ -213,148 +240,213 @@ export const miSkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    '- mi_tool: Descripcion de lo que hace esta tool',
+    '- my_tool: Description of what this tool does',
   ],
 };
 ```
 
-Registralo en `packages/skills/src/index.ts`:
+Luego registralo en `packages/skills/src/index.ts`:
 
 ```typescript
-export { miSkill } from './mi-skill/index.js';
-import { miSkill } from './mi-skill/index.js';
-skillRegistry.register(miSkill);
+export { mySkill } from './my-skill/index.js';
+import { mySkill } from './my-skill/index.js';
+skillRegistry.register(mySkill);
 ```
 
-El skill queda disponible automaticamente para el LLM. No hay que modificar ningun otro archivo.
+El skill queda automaticamente disponible para el LLM. No es necesario modificar ningun otro archivo.
 
 </details>
 
 ---
 
-## Tools disponibles
+## Como Funciona
 
-### Productividad
+### Flujo de Mensajes
 
-| Tool | Descripcion |
-|---|---|
-| `save_fact` | Guarda un hecho permanente del usuario en memoria semantica |
-| `create_reminder` | Programa un recordatorio para una fecha y hora futura |
-| `create_note` | Crea una nota de texto libre o una lista con items |
-| `get_notes` | Muestra las notas y listas activas del usuario |
-| `update_note` | Modifica, tacha items, archiva o elimina una nota |
-| `save_contact` | Guarda un contacto con nombre, telefono, email y relacion |
-| `search_contacts` | Busca contactos por nombre o relacion |
-| `configure_daily_briefing` | Activa o configura el resumen diario matutino |
+1. El usuario envia un mensaje en Telegram o WhatsApp.
+2. `TelegramService` recibe el mensaje y crea o actualiza el usuario en PostgreSQL.
+3. Si el usuario es nuevo, se inicia el flujo de onboarding (elegir nombre del asistente).
+4. Para usuarios existentes: se buscan hechos relevantes por busqueda semantica (Voyage + pgvector), se construye un prompt de sistema dinamico, se carga el historial reciente, y se llama a Claude con todas las herramientas disponibles.
+5. Si el LLM invoca una herramienta, se ejecuta y el resultado se retroalimenta.
+6. La respuesta final se envia al usuario. El mensaje se persiste, y la extraccion de hechos se encola en BullMQ (asincrono).
 
-### Finanzas
+### Flujo Proactivo (Recordatorios)
 
-| Tool | Descripcion |
-|---|---|
-| `add_credit_card` | Registra una tarjeta de credito con fechas de corte y pago |
-| `get_credit_cards` | Muestra las tarjetas registradas con saldos |
-| `record_transaction` | Registra un ingreso o gasto con categoria y metodo de pago |
-| `get_finance_summary` | Resumen financiero del mes: ingresos, gastos y balance |
-| `get_recent_transactions` | Lista movimientos recientes con filtros |
-| `create_savings_goal` | Crea una meta de ahorro con monto objetivo |
-| `get_savings_goals` | Muestra metas de ahorro activas con progreso |
-| `calculate_exchange_rate` | Conversion de divisas en tiempo real |
-
-### Comunicacion
-
-| Tool | Descripcion | Requiere |
-|---|---|---|
-| `connect_google` | Genera link OAuth para conectar Google Calendar y Gmail | OAuth config |
-| `list_calendar_events` | Lista proximos eventos del Google Calendar | Google OAuth |
-| `create_calendar_event` | Crea un evento en Google Calendar | Google OAuth |
-| `list_emails` | Lista correos recientes de Gmail con filtros | Google OAuth |
-| `read_email` | Lee el contenido completo de un correo | Google OAuth |
-| `send_email` | Envia un correo desde el Gmail del usuario | Google OAuth |
-| `translate` | Traduce texto entre idiomas | -- |
-| `draft_message` | Genera mensajes formales o informales | -- |
-
-### Salud
-
-| Tool | Descripcion |
-|---|---|
-| `add_medication` | Registra un medicamento con horarios y dosis |
-| `get_medications` | Muestra medicamentos activos |
-| `create_habit` | Crea un habito para trackear diariamente |
-| `log_habit` | Registra progreso en un habito |
-| `get_habit_progress` | Muestra progreso de habitos de hoy |
-| `add_emergency_contact` | Registra un contacto de emergencia |
-| `get_emergency_contacts` | Muestra contactos de emergencia |
-
-### Utilidad
-
-| Tool | Descripcion | Requiere |
-|---|---|---|
-| `web_search` | Busqueda web actualizada | `BRAVE_SEARCH_API_KEY` |
-| `get_weather` | Clima actual de cualquier ciudad | -- |
-| `summarize_news` | Busca y resume noticias actuales | `BRAVE_SEARCH_API_KEY` |
+1. El usuario dice "recuerdame X el viernes a las 8am".
+2. Claude llama a la herramienta `create_reminder`.
+3. `SchedulerService` crea un trabajo en BullMQ con el retraso calculado.
+4. En el momento programado, `ScheduledJobProcessor` genera un mensaje personalizado con Claude y lo entrega al usuario.
 
 ---
 
-## Optimizacion de tokens
+## Herramientas Disponibles
 
-Evva esta disenado para minimizar el consumo de tokens por mensaje:
+### Productividad
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `save_fact` | Persistir un hecho permanente sobre el usuario | -- |
+| `create_note` | Crear notas o listas | -- |
+| `get_notes` | Ver notas y listas activas | -- |
+| `update_note` | Modificar, marcar items, archivar o eliminar notas | -- |
+| `save_contact` | Guardar un contacto (nombre, telefono, email, relacion) | -- |
+| `search_contacts` | Buscar contactos por nombre o relacion | -- |
+| `create_reminder` | Programar un recordatorio futuro | Redis |
+| `configure_daily_briefing` | Habilitar/deshabilitar resumen matutino diario | -- |
+
+### Finanzas
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `add_credit_card` | Registrar una tarjeta de credito con fechas de corte y pago | -- |
+| `get_credit_cards` | Ver tarjetas registradas con saldos | -- |
+| `record_transaction` | Registrar ingreso o gasto | -- |
+| `get_finance_summary` | Resumen financiero mensual por categoria | -- |
+| `get_recent_transactions` | Ver transacciones recientes | -- |
+| `create_savings_goal` | Crear una meta de ahorro con monto objetivo | -- |
+| `get_savings_goals` | Ver progreso de ahorros | -- |
+
+### Comunicacion
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `connect_google` | Generar enlace OAuth de Google (Calendar + Gmail) | Google OAuth |
+| `list_calendar_events` | Listar eventos proximos del calendario | Google OAuth |
+| `create_calendar_event` | Crear un nuevo evento de calendario | Google OAuth |
+| `list_emails` | Listar correos recientes | Google OAuth |
+| `read_email` | Leer contenido completo de un correo | Google OAuth |
+| `send_email` | Enviar un correo desde el Gmail del usuario | Google OAuth |
+
+### Salud
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `add_medication` | Registrar un medicamento con horario | -- |
+| `get_medications` | Ver medicamentos activos | -- |
+| `create_habit` | Crear un habito para seguimiento diario | -- |
+| `log_habit` | Registrar progreso de un habito | -- |
+| `get_habit_progress` | Ver cumplimiento de habitos del dia | -- |
+| `add_emergency_contact` | Registrar un contacto de emergencia | -- |
+| `get_emergency_contacts` | Ver contactos de emergencia | -- |
+
+### Utilidades
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `web_search` | Busqueda web actualizada | `BRAVE_SEARCH_API_KEY` |
+| `summarize_news` | Buscar y resumir noticias actuales | `BRAVE_SEARCH_API_KEY` |
+| `get_weather` | Clima actual para una ciudad | -- |
+| `translate` | Traducir texto entre idiomas | -- |
+| `calculate_exchange_rate` | Conversion de divisas en tiempo real | -- |
+| `draft_message` | Generar mensajes formales/informales | -- |
+| `save_birthday` | Guardar una fecha de cumpleanos | -- |
+| `check_upcoming_birthdays` | Consultar cumpleanos proximos | -- |
+| `suggest_recipes` | Sugerir recetas desde lista de compras | -- |
+
+### Media
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `connect_spotify` | Generar enlace OAuth de Spotify | Spotify OAuth |
+| `now_playing` | Mostrar cancion en reproduccion | Spotify OAuth |
+| `recent_tracks` | Mostrar canciones reproducidas recientemente | Spotify OAuth |
+| `top_tracks` | Mostrar canciones mas escuchadas del usuario | Spotify OAuth |
+| `search_music` | Buscar en el catalogo de Spotify | Spotify OAuth |
+
+### Gestion de Datos
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `update_user_data` | Actualizar contactos, emergencia, tarjetas, medicamentos, habitos | -- |
+| `delete_user_data` | Eliminar contactos, hechos, medicamentos, habitos | -- |
+| `set_finance_secret` | Establecer una palabra secreta para proteccion financiera | -- |
+| `verify_finance_secret` | Verificar palabra secreta antes de operaciones financieras | -- |
+| `create_runtime_skill` | Crear un skill personalizado via conversacion | -- |
+| `list_runtime_skills` | Listar skills personalizados del usuario | -- |
+
+---
+
+## Optimizacion de Tokens
+
+Evva esta disenado para minimizar el consumo de tokens LLM por mensaje:
 
 | Optimizacion | Antes | Despues | Ahorro |
-|---|---|---|---|
-| Ventana de historial | 12 mensajes | 6 mensajes | ~480 tokens |
-| maxSteps (rondas de tool calls) | 3 | 2 | ~5,400 tokens |
-| System prompt (bloque de comportamiento) | 225 tokens | 80 tokens | ~145 tokens |
-| Filtro de skills OAuth | 42 tools siempre cargadas | Solo tools conectadas | ~2,000 tokens |
-| Query de providers | 2 llamadas DB por mensaje | 1 llamada cacheada (Redis 5min) | Latencia |
-| Skill registry | Checa env vars en cada llamada | Cache despues de la primera | CPU |
+|:--|:--|:--|:--|
+| Ventana de historial de conversacion | 12 mensajes | 6 mensajes | ~480 tokens |
+| maxSteps (rondas de llamadas a herramientas) | 3 | 2 | ~5,400 tokens |
+| Prompt de sistema (bloque de comportamiento) | 225 tokens | 80 tokens | ~145 tokens |
+| Filtrado de skills OAuth | Las 42 herramientas siempre cargadas | Solo herramientas conectadas cargadas | ~2,000 tokens |
+| Consulta de proveedor | 2 llamadas a BD por mensaje | 1 llamada cacheada (Redis 5min TTL) | Latencia |
+| Registro de skills | Verificacion de env en cada llamada | Cacheado despues de la primera llamada | CPU |
 
-**Reduccion estimada: ~55% (de ~23K a ~10K tokens por mensaje)**
+**Reduccion total estimada: ~55% (de ~23K a ~10K tokens por mensaje)**
 
 ```
-Antes:   [system prompt ~1,400] + [42 tool schemas ~3,000] + [historial ~960] x 3 steps = ~23,000 tokens
-Despues: [system prompt ~1,200] + [~20 tool schemas ~1,500] + [historial ~480] x 2 steps = ~10,000 tokens
+Antes:   [system ~1,400] + [42 tools ~3,000] + [history ~960] x 3 steps = ~23,000 tokens
+Despues: [system ~1,200] + [~20 tools ~1,500] + [history ~480] x 2 steps = ~10,000 tokens
 ```
 
 ---
 
 ## Configuracion
 
-### Variables requeridas
+### Variables de Entorno Requeridas
 
 | Variable | Donde obtenerla |
-|---|---|
+|:--|:--|
 | `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) en Telegram |
 | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
 | `VOYAGE_API_KEY` | [dash.voyageai.com](https://dash.voyageai.com) |
-| `DATABASE_URL` | `postgresql://localhost:5432/evva` en desarrollo |
-| `REDIS_URL` | `redis://localhost:6379` en desarrollo |
+| `DATABASE_URL` | `postgresql://localhost:5432/evva` para desarrollo local |
+| `REDIS_URL` | `redis://localhost:6379` para desarrollo local |
 
-### Variables opcionales
+### Variables de Entorno Opcionales
 
 | Variable | Proposito |
-|---|---|
-| `BRAVE_SEARCH_API_KEY` | Busqueda web ([brave.com/search/api](https://brave.com/search/api/)) |
-| `GROQ_API_KEY` | Transcripcion de audio con Whisper |
+|:--|:--|
+| `BRAVE_SEARCH_API_KEY` | Herramienta de busqueda web ([brave.com/search/api](https://brave.com/search/api/)) |
+| `GROQ_API_KEY` | Transcripcion de notas de voz via Whisper |
 | `GOOGLE_CLIENT_ID` | Integracion con Google Calendar y Gmail |
 | `GOOGLE_CLIENT_SECRET` | Integracion con Google Calendar y Gmail |
-| `APP_BRAND_NAME` | Nombre personalizado del asistente (default: "Evva") |
+| `APP_BRAND_NAME` | Nombre de marca personalizado del asistente (por defecto: "Evva") |
 | `LLM_MODEL` | Sobreescribir el modelo de Claude por defecto |
 | `TELEGRAM_WEBHOOK_URL` | Solo produccion |
 | `TELEGRAM_SECRET_TOKEN` | Solo produccion -- generar con `openssl rand -hex 32` |
 
 ---
 
+## Desarrollo
+
+```bash
+pnpm build              # Compilar todos los paquetes y apps
+pnpm build:gateway      # Compilar solo gateway
+pnpm build:worker       # Compilar solo worker
+
+pnpm test               # Ejecutar todas las pruebas
+pnpm test:watch         # Ejecutar pruebas en modo watch
+pnpm test:cov           # Ejecutar pruebas con cobertura
+
+pnpm lint               # Lint en todos los paquetes
+pnpm lint:fix           # Lint y auto-correccion
+
+pnpm db:migrate         # Ejecutar migraciones pendientes
+pnpm db:migrate:new     # Crear un nuevo archivo de migracion
+```
+
+### Comandos de Telegram
+
+| Comando | Accion |
+|:--|:--|
+| `/start` | Mensaje de bienvenida y onboarding |
+| `/reset` | Iniciar una nueva sesion de conversacion |
+| `/memory` | Mostrar lo que el asistente recuerda |
+| `/help` | Listar comandos disponibles |
+
+---
+
 ## Contribuir
 
-Las contribuciones son bienvenidas:
-
-1. Haz fork del repositorio y crea una rama para tu feature.
-2. Escribe tests para cualquier funcionalidad nueva.
-3. Asegurate de que `pnpm test` y `pnpm lint` pasen sin errores.
-4. Haz commits enfocados con mensajes claros.
-5. Abre un Pull Request describiendo que cambiaste y por que.
-
-Para bugs y feature requests, abre un issue.
+Las contribuciones son bienvenidas! Haz fork del repositorio, crea una rama de feature y abre un pull request. Asegurate de que todas las pruebas pasen (`pnpm test`) y el linting este limpio (`pnpm lint`) antes de enviar. Para bugs y solicitudes de features, abre un issue.
 
 ---
 
@@ -365,5 +457,5 @@ Este proyecto esta bajo la [Licencia MIT](LICENSE).
 ---
 
 <p align="center">
-  Hecho por <a href="https://laca-soft.com">LACA-SOFT</a> · <a href="https://github.com/lacasoft">GitHub</a>
+  Hecho por <a href="https://laca-soft.com">LACA-SOFT</a> &middot; <a href="https://github.com/lacasoft">GitHub</a>
 </p>
