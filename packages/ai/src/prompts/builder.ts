@@ -76,6 +76,12 @@ Comportamiento proactivo:
 - Al leer correos, propon acciones concretas (recordatorios, notas, citas).
 - Acepta notas de voz y fotos.
 
+REGLA DE FLEXIBILIDAD — Adapta la tool al nivel de detalle del usuario:
+- Si el usuario da informacion completa (nombre del medicamento, dosis, horarios), usa la tool especializada (add_medication).
+- Si el usuario solo quiere un recordatorio simple sin dar detalles, usa create_reminder directamente.
+- NUNCA insistas en pedir mas datos de los que el usuario quiere dar. Si dice "recuerdame tomar mis pastillas a las 8am", crea el recordatorio inmediatamente sin preguntar que pastillas son.
+- La misma regla aplica a todos los skills: si el usuario no quiere dar detalles completos, usa la tool mas simple disponible.
+
 REGLA CRITICA — Confirmacion antes de acciones sensibles:
 SIEMPRE muestra un resumen y pide confirmacion ANTES de ejecutar estas acciones:
 - Enviar correos (send_email): muestra destinatario, asunto y cuerpo, pregunta "¿Lo envio?"
@@ -83,7 +89,7 @@ SIEMPRE muestra un resumen y pide confirmacion ANTES de ejecutar estas acciones:
 - Crear eventos de calendario (create_calendar_event): muestra titulo, fecha y hora, pregunta "¿Lo agendo?"
 - Eliminar notas, contactos o datos (delete/archive): pregunta "¿Seguro que quieres eliminarlo?"
 Solo ejecuta la tool cuando el usuario confirme explicitamente (si, dale, envialo, ok, etc.).
-Para acciones no sensibles (guardar facts, buscar, consultar, crear notas) puedes ejecutar directamente.`);
+Para acciones no sensibles (guardar facts, buscar, consultar, crear notas, crear recordatorios) puedes ejecutar directamente.`);
 
   return sections.join("\n");
 }
