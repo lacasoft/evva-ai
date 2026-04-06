@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { saveFactForRAG } from "../rag-helper.js";
 import {
   createCreditCard,
   getUserCreditCards,
@@ -66,6 +67,12 @@ export const financeSkill: SkillDefinition = {
             cutOffDay: cut_off_day,
             paymentDueDay: payment_due_day,
             annualRate: annual_rate,
+          });
+          await saveFactForRAG({
+            userId: ctx.user.id,
+            content: `Tarjeta de credito: ${name} (****${last_four_digits}), corte dia ${cut_off_day}, pago dia ${payment_due_day}${brand ? ", " + brand : ""}`,
+            category: "other",
+            importance: 0.8,
           });
           return {
             success: true,
@@ -179,6 +186,14 @@ export const financeSkill: SkillDefinition = {
             isRecurring: is_recurring,
             date: date ? new Date(date) : undefined,
           });
+          if (amount >= 500 || type === "income") {
+            await saveFactForRAG({
+              userId: ctx.user.id,
+              content: `${type === "income" ? "Ingreso" : "Gasto"}: $${amount} - ${description} (${category})`,
+              category: "other",
+              importance: type === "income" ? 0.7 : 0.5,
+            });
+          }
           return {
             success: true,
             transactionId: tx.id,
@@ -298,6 +313,12 @@ export const financeSkill: SkillDefinition = {
             name,
             targetAmount: target_amount,
             targetDate: target_date ? new Date(target_date) : undefined,
+          });
+          await saveFactForRAG({
+            userId: ctx.user.id,
+            content: `Meta de ahorro: ${name}, objetivo $${target_amount}`,
+            category: "goal",
+            importance: 0.8,
           });
           return {
             success: true,

@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { saveFactForRAG } from "../rag-helper.js";
 import {
   createEmergencyContact,
   getUserEmergencyContacts,
@@ -35,6 +36,12 @@ export const emergencySkill: SkillDefinition = {
             phone,
             relationship,
             isPrimary: is_primary,
+          });
+          await saveFactForRAG({
+            userId: ctx.user.id,
+            content: `Contacto de emergencia: ${name}, tel: ${phone}, relacion: ${relationship}${is_primary ? " (principal)" : ""}`,
+            category: "relationship",
+            importance: 0.9,
           });
           return {
             success: true,
