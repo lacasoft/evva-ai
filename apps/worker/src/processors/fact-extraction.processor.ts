@@ -119,7 +119,7 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
       this.logger.error(
         `Fact extraction error for session ${sessionId}: ${error}`,
       );
-      // No re-lanzar — la extracción de facts es best-effort
+      throw error; // Re-throw so BullMQ can retry with backoff
     }
   }
 
@@ -169,8 +169,8 @@ export class FactExtractionProcessor implements OnModuleInit, OnModuleDestroy {
               ? Math.min(1, Math.max(0.1, f.importance))
               : 0.5,
         }));
-    } catch {
-      this.logger.debug("Failed to parse fact extraction response");
+    } catch (err) {
+      this.logger.warn(`Failed to parse fact extraction response: ${err}`);
       return [];
     }
   }

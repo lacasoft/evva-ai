@@ -20,6 +20,11 @@ export class ConversationService {
   // Cache de sessionId por usuario para agrupar mensajes de la misma sesión
   private readonly activeSessions = new Map<string, string>();
   private readonly sessionTimers = new Map<string, NodeJS.Timeout>();
+  // Accumulate messages per session for batch extraction on session expiry
+  private readonly sessionMessages = new Map<
+    string,
+    Array<{ role: "user" | "assistant"; content: string }>
+  >();
 
   constructor(
     private readonly personaService: PersonaService,
@@ -121,16 +126,13 @@ export class ConversationService {
       },
     });
 
-    // 8. Encolar extracción de facts de forma asíncrona (no bloquea la respuesta)
-    this.schedulerService
-      .enqueueFactExtraction({
-        userId: user.id,
-        sessionId,
-        messages: [...historyForLLM, { role: "assistant", content: replyText }],
-      })
-      .catch((err) => {
-        this.logger.error(`Failed to enqueue fact extraction: ${err}`);
-      });
+    // 8. Accumulate messages for batch extraction (runs when session expires)
+    const sessionMsgs = this.sessionMessages.get(sessionId) ?? [];
+    sessionMsgs.push(
+      { role: "user", content: incomingText },
+      { role: "assistant", content: replyText },
+    );
+    this.sessionMessages.set(sessionId, sessionMsgs);
 
     this.logger.log(
       `Response generated for user ${user.id} | ${llmResponse.usage.totalTokens} tokens`,
@@ -174,7 +176,23 @@ export class ConversationService {
         if (this.activeSessions.get(userId) === sessionId) {
           this.activeSessions.delete(userId);
           this.sessionTimers.delete(userId);
-          this.logger.debug(`Session expired for user ${userId}`);
+
+          // Batch extract facts for the entire session (not per message)
+          const msgs = this.sessionMessages.get(sessionId);
+          if (msgs && msgs.length > 0) {
+            this.schedulerService
+              .enqueueFactExtraction({
+                userId,
+                sessionId,
+                messages: msgs,
+              })
+              .catch((err) => {
+                this.logger.error(`Failed to enqueue batch fact extraction: ${err}`);
+              });
+            this.sessionMessages.delete(sessionId);
+          }
+
+          this.logger.debug(`Session expired for user ${userId} — extraction enqueued`);
         }
       },
       30 * 60 * 1000,
@@ -184,6 +202,17 @@ export class ConversationService {
 
   // Permite forzar una nueva sesión (ej: /reset command)
   resetSession(userId: string): void {
+    // Trigger extraction for current session before resetting
+    const sessionId = this.activeSessions.get(userId);
+    if (sessionId) {
+      const msgs = this.sessionMessages.get(sessionId);
+      if (msgs && msgs.length > 0) {
+        this.schedulerService
+          .enqueueFactExtraction({ userId, sessionId, messages: msgs })
+          .catch(() => {});
+        this.sessionMessages.delete(sessionId);
+      }
+    }
     this.activeSessions.delete(userId);
     this.logger.debug(`Session reset for user ${userId}`);
   }

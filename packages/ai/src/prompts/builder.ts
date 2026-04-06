@@ -105,30 +105,32 @@ export function buildFactExtractionPrompt(
     .map((m) => `${m.role === "user" ? "Usuario" : "Asistente"}: ${m.content}`)
     .join("\n");
 
-  return `Analiza esta conversación y extrae SOLO los hechos importantes y permanentes sobre el usuario.
+  return `Analiza esta conversacion y extrae SOLO los hechos importantes y permanentes sobre el usuario.
 
-Conversación:
+Conversacion:
 ${conversation}
 
-Extrae únicamente información que sea:
-- Personal y específica del usuario (NO información general)
-- Duradera (no información temporal o de un momento puntual)
-- Útil para futuras conversaciones
+REGLAS de extraccion:
+- Solo informacion personal y especifica del usuario (NO informacion general)
+- Solo datos duraderos (no temporales o puntuales)
+- Solo datos utiles para futuras conversaciones
+- NO repitas hechos que ya se mencionaron en mensajes anteriores de esta misma conversacion
+- Si el usuario CORRIGE informacion previa (ej: "en realidad vivo en Madrid", "mi esposa se llama Maria"), extrae el dato NUEVO y marcalo como correccion
 
-Para cada hecho, determina su categoría:
-- personal: nombre, edad, ubicación, datos biográficos
+Categorias:
+- personal: nombre, edad, ubicacion, datos biograficos
 - relationship: familia, pareja, amigos, mascotas
 - work: trabajo, empresa, rol, proyectos
-- preference: gustos, hábitos, estilo de vida
-- goal: objetivos, planes, sueños
+- preference: gustos, habitos, estilo de vida
+- goal: objetivos, planes, suenos
 - reminder: cosas importantes que no quiere olvidar
-- other: cualquier otra información relevante
+- other: cualquier otra informacion relevante
 
-Responde ÚNICAMENTE con un JSON válido en este formato exacto:
+Responde UNICAMENTE con un JSON valido en este formato exacto:
 {
   "facts": [
     {
-      "content": "descripción clara del hecho",
+      "content": "descripcion clara del hecho",
       "category": "personal|relationship|work|preference|goal|reminder|other",
       "importance": 0.1-1.0
     }

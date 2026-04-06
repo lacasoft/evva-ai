@@ -7,6 +7,7 @@ export { saveFactForRAG } from "./rag-helper.js";
 export { memorySkill } from "./memory/index.js";
 export { notesSkill } from "./notes/index.js";
 export { contactsSkill } from "./contacts/index.js";
+export { dataManagementSkill } from "./data-management/index.js";
 export { remindersSkill } from "./reminders/index.js";
 
 // Finance
@@ -43,6 +44,7 @@ import { skillRegistry } from "./registry.js";
 import { memorySkill } from "./memory/index.js";
 import { notesSkill } from "./notes/index.js";
 import { contactsSkill } from "./contacts/index.js";
+import { dataManagementSkill } from "./data-management/index.js";
 import { remindersSkill } from "./reminders/index.js";
 import { financeSkill } from "./finance/index.js";
 import { financeSecuritySkill } from "./finance-security/index.js";
@@ -67,6 +69,7 @@ import { spotifySkill } from "./spotify/index.js";
 skillRegistry.register(memorySkill);
 skillRegistry.register(notesSkill);
 skillRegistry.register(contactsSkill);
+skillRegistry.register(dataManagementSkill);
 skillRegistry.register(remindersSkill);
 skillRegistry.register(financeSkill);
 skillRegistry.register(financeSecuritySkill);

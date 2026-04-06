@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import type { MemoryCategory, MemoryFact } from "@evva/core";
+import { LIMITS } from "@evva/core";
 import {
   saveMemoryFact,
   searchSimilarFacts,
@@ -49,7 +50,7 @@ export class MemoryService {
       userId: params.userId,
       embedding,
       limit: params.limit ?? 5,
-      threshold: 0.65,
+      threshold: LIMITS.MEMORY_SEARCH_THRESHOLD,
     });
 
     this.logger.debug(
