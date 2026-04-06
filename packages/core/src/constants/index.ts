@@ -20,6 +20,12 @@ export const LIMITS = {
   // Cuántos facts recuperar por búsqueda semántica
   MEMORY_RETRIEVAL_TOP_K: 5,
 
+  // Umbral de similaridad para búsqueda semántica (0.0 - 1.0)
+  MEMORY_SEARCH_THRESHOLD: 0.65,
+
+  // Umbral para considerar un fact como duplicado (0.0 - 1.0)
+  MEMORY_DEDUP_THRESHOLD: 0.92,
+
   // Longitud máxima de un fact en caracteres
   MEMORY_FACT_MAX_LENGTH: 500,
 
