@@ -264,7 +264,8 @@ export async function getEmailUnsubscribeInfo(
 
   const headers = data.payload.headers;
   const getHeader = (name: string) =>
-    headers.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value ?? "";
+    headers.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value ??
+    "";
 
   const listUnsubscribe = getHeader("List-Unsubscribe");
 
@@ -284,7 +285,9 @@ export async function getEmailUnsubscribeInfo(
   if (!unsubscribeUrl) {
     let body = "";
     if (data.payload.parts) {
-      const htmlPart = data.payload.parts.find((p) => p.mimeType === "text/html");
+      const htmlPart = data.payload.parts.find(
+        (p) => p.mimeType === "text/html",
+      );
       if (htmlPart?.body?.data) body = decodeBase64Url(htmlPart.body.data);
     } else if (data.payload.body?.data) {
       body = decodeBase64Url(data.payload.body.data);
@@ -342,12 +345,14 @@ export async function listPromotionalEmails(
 
   // Get unsubscribe info for each (limit to 10 to avoid rate limits)
   const results = await Promise.all(
-    data.messages.slice(0, 10).map((msg) =>
-      getEmailUnsubscribeInfo(accessToken, msg.id),
-    ),
+    data.messages
+      .slice(0, 10)
+      .map((msg) => getEmailUnsubscribeInfo(accessToken, msg.id)),
   );
 
-  return results.filter((r): r is UnsubscribeInfo => r !== null && r.hasUnsubscribe);
+  return results.filter(
+    (r): r is UnsubscribeInfo => r !== null && r.hasUnsubscribe,
+  );
 }
 
 /**

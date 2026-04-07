@@ -26,10 +26,19 @@ export const skillCreatorSkill: SkillDefinition = {
       parameters: z.object({
         skill_name: z
           .string()
-          .describe("Nombre del skill en kebab-case (ej: 'mercadolibre-search')"),
+          .describe(
+            "Nombre del skill en kebab-case (ej: 'mercadolibre-search')",
+          ),
         description: z.string().describe("Descripcion del skill"),
         category: z
-          .enum(["productivity", "communication", "finance", "health", "utility", "search"])
+          .enum([
+            "productivity",
+            "communication",
+            "finance",
+            "health",
+            "utility",
+            "search",
+          ])
           .default("utility"),
         tools: z
           .array(
@@ -39,7 +48,9 @@ export const skillCreatorSkill: SkillDefinition = {
               parameters: z
                 .record(
                   z.object({
-                    type: z.enum(["string", "number", "boolean"]).default("string"),
+                    type: z
+                      .enum(["string", "number", "boolean"])
+                      .default("string"),
                     description: z.string(),
                   }),
                 )
@@ -48,20 +59,32 @@ export const skillCreatorSkill: SkillDefinition = {
                 type: z.literal("http_request"),
                 url: z
                   .string()
-                  .describe("URL con placeholders {{params.key}} y {{env.KEY}}"),
+                  .describe(
+                    "URL con placeholders {{params.key}} y {{env.KEY}}",
+                  ),
                 method: z.enum(["GET", "POST", "PUT", "DELETE"]).default("GET"),
                 headers: z.record(z.string()).optional(),
-                body: z.string().optional().describe("Body template con {{params.key}}"),
+                body: z
+                  .string()
+                  .optional()
+                  .describe("Body template con {{params.key}}"),
               }),
               responseMapping: z
                 .string()
                 .optional()
-                .describe("Path para extraer datos del response (ej: 'data.results')"),
+                .describe(
+                  "Path para extraer datos del response (ej: 'data.results')",
+                ),
             }),
           )
           .describe("Tools del skill — cada uno hace un HTTP request"),
       }),
-      execute: async ({ skill_name, description, category, tools: toolConfigs }) => {
+      execute: async ({
+        skill_name,
+        description,
+        category,
+        tools: toolConfigs,
+      }) => {
         try {
           // Validate: only http/https URLs
           for (const t of toolConfigs) {
@@ -143,10 +166,16 @@ export const skillCreatorSkill: SkillDefinition = {
           const skills = await getUserRuntimeSkills(ctx.user.id);
           const skill = skills.find((s) => s.name === skill_name);
           if (!skill) {
-            return { success: false, error: `No encontre un skill llamado "${skill_name}"` };
+            return {
+              success: false,
+              error: `No encontre un skill llamado "${skill_name}"`,
+            };
           }
           await disableRuntimeSkill(skill.id, ctx.user.id);
-          return { success: true, message: `Skill "${skill_name}" desactivado` };
+          return {
+            success: true,
+            message: `Skill "${skill_name}" desactivado`,
+          };
         } catch {
           return { success: false, error: "No se pudo desactivar el skill" };
         }

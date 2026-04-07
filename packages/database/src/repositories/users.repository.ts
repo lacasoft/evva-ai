@@ -1,5 +1,5 @@
 import type { Assistant, OnboardingState, User } from "@evva/core";
-import { generateId } from "@evva/core";
+import { generateId, DEFAULT_TIMEZONE } from "@evva/core";
 import { query, queryOne } from "../client.js";
 
 // ============================================================
@@ -44,7 +44,7 @@ export async function createUser(params: {
       params.telegramUsername ?? null,
       params.telegramFirstName ?? null,
       params.language ?? "es",
-      params.timezone ?? "America/Mexico_City",
+      params.timezone ?? DEFAULT_TIMEZONE,
       now,
     ],
   );

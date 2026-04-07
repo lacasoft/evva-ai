@@ -36,7 +36,10 @@ export const gmailSkill: SkillDefinition = {
         });
         return refreshed.accessToken;
       } catch (err) {
-        console.error(`[Gmail] Failed to refresh Google token for user ${userId}:`, err);
+        console.error(
+          `[Gmail] Failed to refresh Google token for user ${userId}:`,
+          err,
+        );
         return null;
       }
     };

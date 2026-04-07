@@ -41,7 +41,10 @@ export const calendarSkill: SkillDefinition = {
         });
         return refreshed.accessToken;
       } catch (err) {
-        console.error(`[Calendar] Failed to refresh Google token for user ${userId}:`, err);
+        console.error(
+          `[Calendar] Failed to refresh Google token for user ${userId}:`,
+          err,
+        );
         return null;
       }
     };

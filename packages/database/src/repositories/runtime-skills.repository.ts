@@ -88,9 +88,7 @@ export async function deleteRuntimeSkill(
 
 function mapToRuntimeSkill(d: Record<string, unknown>): RuntimeSkillRecord {
   const config =
-    typeof d.config === "string"
-      ? JSON.parse(d.config as string)
-      : d.config;
+    typeof d.config === "string" ? JSON.parse(d.config as string) : d.config;
   return {
     id: d.id as string,
     userId: d.user_id as string,

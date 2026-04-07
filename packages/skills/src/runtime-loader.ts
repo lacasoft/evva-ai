@@ -57,10 +57,7 @@ export function buildRuntimeTools(
           const envPattern = /\{\{env\.(\w+)\}\}/g;
           url = url.replace(envPattern, (_, key) => process.env[key] ?? "");
           if (body)
-            body = body.replace(
-              envPattern,
-              (_, key) => process.env[key] ?? "",
-            );
+            body = body.replace(envPattern, (_, key) => process.env[key] ?? "");
           for (const [hKey, hVal] of Object.entries(headers)) {
             headers[hKey] = hVal.replace(
               envPattern,

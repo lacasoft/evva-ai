@@ -2,7 +2,11 @@ import { tool } from "ai";
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import type { SkillDefinition } from "../base-skill.js";
-import { setFinanceSecret, getFinanceSecret, disableFinanceSecret } from "@evva/database";
+import {
+  setFinanceSecret,
+  getFinanceSecret,
+  disableFinanceSecret,
+} from "@evva/database";
 
 function hashSecret(secret: string): string {
   return createHash("sha256").update(secret.trim().toLowerCase()).digest("hex");

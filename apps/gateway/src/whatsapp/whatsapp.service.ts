@@ -506,7 +506,11 @@ export class WhatsAppService {
   /**
    * Send reply — detects [VOICE] marker and sends audio instead of text.
    */
-  async sendReply(to: string, text: string, language: "es" | "en" = "es"): Promise<void> {
+  async sendReply(
+    to: string,
+    text: string,
+    language: "es" | "en" = "es",
+  ): Promise<void> {
     if (text.includes("[VOICE]")) {
       const voiceText = text.replace("[VOICE]", "").trim();
       await this.sendVoice(to, voiceText, language);
@@ -515,7 +519,11 @@ export class WhatsAppService {
     await this.sendMessage(to, text);
   }
 
-  async sendVoice(to: string, text: string, language: "es" | "en" = "es"): Promise<void> {
+  async sendVoice(
+    to: string,
+    text: string,
+    language: "es" | "en" = "es",
+  ): Promise<void> {
     const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
     if (!accessToken || !phoneNumberId) return;
@@ -525,7 +533,11 @@ export class WhatsAppService {
 
       // Upload audio to WhatsApp media API
       const formData = new FormData();
-      formData.append("file", new Blob([audio], { type: "audio/ogg" }), "voice.ogg");
+      formData.append(
+        "file",
+        new Blob([audio], { type: "audio/ogg" }),
+        "voice.ogg",
+      );
       formData.append("messaging_product", "whatsapp");
       formData.append("type", "audio/ogg");
 

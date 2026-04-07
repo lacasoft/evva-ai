@@ -7,6 +7,10 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.string().default("3000"),
 
+  // Timezone y lenguaje por defecto
+  DEFAULT_TIMEZONE: z.string().default("America/Mexico_City"),
+  DEFAULT_LANGUAGE: z.enum(["es", "en"]).default("es"),
+
   // Telegram
   TELEGRAM_BOT_TOKEN: z.string().min(1, "TELEGRAM_BOT_TOKEN es requerido"),
   TELEGRAM_WEBHOOK_URL: z

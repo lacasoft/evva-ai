@@ -344,7 +344,7 @@ export class OnboardingService {
     );
 
     return {
-      message: messages[previousStep] ?? await this.startOnboarding(user),
+      message: messages[previousStep] ?? (await this.startOnboarding(user)),
       isComplete: false,
     };
   }

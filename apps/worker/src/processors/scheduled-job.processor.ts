@@ -82,7 +82,10 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
           const response = await generateResponse({
             systemPrompt: prompt,
             messages: [
-              { role: "user", content: "Genera el mensaje de recordatorio ahora." },
+              {
+                role: "user",
+                content: "Genera el mensaje de recordatorio ahora.",
+              },
             ],
             maxTokens: 256,
             temperature: 0.8,
@@ -90,10 +93,7 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
 
           const message = response.text?.trim();
           if (message) {
-            await this.telegramSender.send(
-              Number(row.telegram_id),
-              message,
-            );
+            await this.telegramSender.send(Number(row.telegram_id), message);
           }
 
           await dbQuery(

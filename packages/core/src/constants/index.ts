@@ -163,5 +163,8 @@ export const TIMEZONES = [
 
 export type Timezone = (typeof TIMEZONES)[number];
 
-export const DEFAULT_TIMEZONE: Timezone = "America/Mexico_City";
-export const DEFAULT_LANGUAGE = "es" as const;
+export const DEFAULT_TIMEZONE = (process.env.DEFAULT_TIMEZONE ??
+  "America/Mexico_City") as string;
+export const DEFAULT_LANGUAGE = (process.env.DEFAULT_LANGUAGE ?? "es") as
+  | "es"
+  | "en";

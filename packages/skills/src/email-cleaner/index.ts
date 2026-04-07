@@ -39,9 +39,7 @@ export const emailCleanerSkill: SkillDefinition = {
         });
         return refreshed.accessToken;
       } catch (err) {
-        console.error(
-          `[EmailCleaner] Failed to refresh token: ${err}`,
-        );
+        console.error(`[EmailCleaner] Failed to refresh token: ${err}`);
         return null;
       }
     };
@@ -90,8 +88,7 @@ export const emailCleanerSkill: SkillDefinition = {
             // Group by sender domain
             const bySender = new Map<string, typeof promotionals>();
             for (const email of promotionals) {
-              const domain =
-                email.from.match(/@([^>]+)/)?.[1] ?? email.from;
+              const domain = email.from.match(/@([^>]+)/)?.[1] ?? email.from;
               const list = bySender.get(domain) ?? [];
               list.push(email);
               bySender.set(domain, list);
@@ -130,9 +127,7 @@ export const emailCleanerSkill: SkillDefinition = {
           "SIEMPRE pide confirmacion antes de ejecutar. " +
           "Muestra el remitente y pregunta '¿Te desuscribo de [remitente]?'",
         parameters: z.object({
-          sender: z
-            .string()
-            .describe("Nombre o dominio del remitente"),
+          sender: z.string().describe("Nombre o dominio del remitente"),
           unsubscribe_url: z
             .string()
             .optional()
@@ -142,9 +137,7 @@ export const emailCleanerSkill: SkillDefinition = {
           email_id: z
             .string()
             .optional()
-            .describe(
-              "ID del correo para buscar el link de desuscripcion",
-            ),
+            .describe("ID del correo para buscar el link de desuscripcion"),
         }),
         execute: async ({ sender, unsubscribe_url, email_id }) => {
           try {
@@ -160,10 +153,7 @@ export const emailCleanerSkill: SkillDefinition = {
                 };
               }
 
-              const info = await getEmailUnsubscribeInfo(
-                accessToken,
-                email_id,
-              );
+              const info = await getEmailUnsubscribeInfo(accessToken, email_id);
               if (info?.unsubscribeUrl) {
                 url = info.unsubscribeUrl;
               }
@@ -213,9 +203,7 @@ export const emailCleanerSkill: SkillDefinition = {
                 url: z.string(),
               }),
             )
-            .describe(
-              "Lista de remitentes con sus URLs de desuscripcion",
-            ),
+            .describe("Lista de remitentes con sus URLs de desuscripcion"),
         }),
         execute: async ({ unsubscribe_urls }) => {
           const results: Array<{

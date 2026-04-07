@@ -187,12 +187,16 @@ export class ConversationService {
                 messages: msgs,
               })
               .catch((err) => {
-                this.logger.error(`Failed to enqueue batch fact extraction: ${err}`);
+                this.logger.error(
+                  `Failed to enqueue batch fact extraction: ${err}`,
+                );
               });
             this.sessionMessages.delete(sessionId);
           }
 
-          this.logger.debug(`Session expired for user ${userId} — extraction enqueued`);
+          this.logger.debug(
+            `Session expired for user ${userId} — extraction enqueued`,
+          );
         }
       },
       30 * 60 * 1000,

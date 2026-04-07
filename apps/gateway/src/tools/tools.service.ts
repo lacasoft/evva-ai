@@ -1,7 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import type { Tool } from "ai";
 import type { User, Assistant } from "@evva/core";
-import { skillRegistry, type SkillContext, buildRuntimeTools } from "@evva/skills";
+import {
+  skillRegistry,
+  type SkillContext,
+  buildRuntimeTools,
+} from "@evva/skills";
 import { query, getUserRuntimeSkills } from "@evva/database";
 import { CacheService } from "../cache/cache.service.js";
 import { MemoryService } from "../memory/memory.service.js";
@@ -31,7 +35,8 @@ export class ToolsService {
       assistant,
       connectedProviders,
       services: {
-        scheduleReminder: (params) => this.schedulerService.scheduleReminder(params),
+        scheduleReminder: (params) =>
+          this.schedulerService.scheduleReminder(params),
       },
     };
 
@@ -45,7 +50,9 @@ export class ToolsService {
         const runtimeTools = buildRuntimeTools(rs.config);
         Object.assign(tools, runtimeTools);
         promptInstructions.push(
-          ...rs.config.tools.map((t) => `- ${t.name}: ${t.description} (runtime skill)`),
+          ...rs.config.tools.map(
+            (t) => `- ${t.name}: ${t.description} (runtime skill)`,
+          ),
         );
       }
       if (runtimeSkills.length > 0) {

@@ -163,7 +163,9 @@ export const healthSkill: SkillDefinition = {
               success: false,
               error: `No encontré un hábito llamado "${habit_name}"`,
             };
-          const today = new Date().toLocaleDateString("en-CA", { timeZone: ctx.user.timezone });
+          const today = new Date().toLocaleDateString("en-CA", {
+            timeZone: ctx.user.timezone,
+          });
           await logHabit(habit.id, ctx.user.id, today, count);
           return {
             success: true,

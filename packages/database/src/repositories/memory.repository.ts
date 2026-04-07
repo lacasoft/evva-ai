@@ -34,10 +34,9 @@ export async function saveMemoryFact(params: {
       );
     }
     // Return the existing fact (updated or not)
-    const updated = await queryOne(
-      "SELECT * FROM memory_facts WHERE id = $1",
-      [existing.id],
-    );
+    const updated = await queryOne("SELECT * FROM memory_facts WHERE id = $1", [
+      existing.id,
+    ]);
     return mapToMemoryFact(updated!);
   }
 

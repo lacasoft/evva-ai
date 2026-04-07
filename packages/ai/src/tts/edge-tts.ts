@@ -30,8 +30,7 @@ export async function textToSpeech(params: {
 
   // Voice selection based on gender preference
   // nova/shimmer = female-sounding, onyx/echo = male-sounding
-  const voice =
-    params.gender === "male" ? "onyx" : "nova";
+  const voice = params.gender === "male" ? "onyx" : "nova";
 
   const response = await fetch(OPENAI_TTS_URL, {
     method: "POST",

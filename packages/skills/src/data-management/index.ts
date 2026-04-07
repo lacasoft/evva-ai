@@ -59,10 +59,7 @@ export const dataManagementSkill: SkillDefinition = {
         try {
           switch (data_type) {
             case "contact": {
-              const contacts = await searchContacts(
-                ctx.user.id,
-                search_name,
-              );
+              const contacts = await searchContacts(ctx.user.id, search_name);
               if (contacts.length === 0) {
                 return {
                   success: false,
@@ -91,9 +88,8 @@ export const dataManagementSkill: SkillDefinition = {
 
             case "emergency_contact": {
               const contacts = await getUserEmergencyContacts(ctx.user.id);
-              const contact = contacts.find(
-                (c) =>
-                  c.name.toLowerCase().includes(search_name.toLowerCase()),
+              const contact = contacts.find((c) =>
+                c.name.toLowerCase().includes(search_name.toLowerCase()),
               );
               if (!contact) {
                 return {
@@ -107,8 +103,7 @@ export const dataManagementSkill: SkillDefinition = {
                 userId: ctx.user.id,
                 name: updates.name ?? contact.name,
                 phone: updates.phone ?? contact.phone,
-                relationship:
-                  updates.relationship ?? contact.relationship,
+                relationship: updates.relationship ?? contact.relationship,
                 isPrimary: contact.isPrimary,
               });
               return {
@@ -153,9 +148,8 @@ export const dataManagementSkill: SkillDefinition = {
 
             case "medication": {
               const meds = await getUserMedications(ctx.user.id);
-              const med = meds.find(
-                (m) =>
-                  m.name.toLowerCase().includes(search_name.toLowerCase()),
+              const med = meds.find((m) =>
+                m.name.toLowerCase().includes(search_name.toLowerCase()),
               );
               if (!med) {
                 return {
@@ -168,9 +162,7 @@ export const dataManagementSkill: SkillDefinition = {
                 dosage: updates.dosage,
                 frequency: updates.frequency,
                 notes: updates.notes,
-                times: updates.times
-                  ? JSON.parse(updates.times)
-                  : undefined,
+                times: updates.times ? JSON.parse(updates.times) : undefined,
               });
               return {
                 success: true,
@@ -186,9 +178,8 @@ export const dataManagementSkill: SkillDefinition = {
 
             case "habit": {
               const habits = await getUserHabits(ctx.user.id);
-              const habit = habits.find(
-                (h) =>
-                  h.name.toLowerCase().includes(search_name.toLowerCase()),
+              const habit = habits.find((h) =>
+                h.name.toLowerCase().includes(search_name.toLowerCase()),
               );
               if (!habit) {
                 return {
@@ -230,13 +221,7 @@ export const dataManagementSkill: SkillDefinition = {
         "Muestra que se va a eliminar y pregunta '¿Seguro?'",
       parameters: z.object({
         data_type: z
-          .enum([
-            "contact",
-            "emergency_contact",
-            "fact",
-            "medication",
-            "habit",
-          ])
+          .enum(["contact", "emergency_contact", "fact", "medication", "habit"])
           .describe("Tipo de dato a eliminar"),
         search_name: z
           .string()
@@ -246,10 +231,7 @@ export const dataManagementSkill: SkillDefinition = {
         try {
           switch (data_type) {
             case "contact": {
-              const contacts = await searchContacts(
-                ctx.user.id,
-                search_name,
-              );
+              const contacts = await searchContacts(ctx.user.id, search_name);
               if (contacts.length === 0) {
                 return {
                   success: false,
