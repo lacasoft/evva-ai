@@ -5,6 +5,7 @@ import {
   saveMemoryFact,
   searchSimilarFacts,
   getAllUserFacts,
+  getProfileFacts,
 } from "@evva/database";
 import { embedText, embedQuery } from "@evva/ai";
 
@@ -36,25 +37,44 @@ export class MemoryService {
   }
 
   // ============================================================
-  // Buscar facts relevantes para una query
+  // Layer 1: Profile facts — always loaded, high importance
   // ============================================================
 
-  async searchRelevantFacts(params: {
+  async getProfileFacts(userId: string): Promise<MemoryFact[]> {
+    return getProfileFacts(
+      userId,
+      LIMITS.MEMORY_PROFILE_TOP_K,
+      LIMITS.MEMORY_PROFILE_IMPORTANCE,
+    );
+  }
+
+  // ============================================================
+  // Layer 2: Contextual facts — enriched semantic search
+  // ============================================================
+
+  async searchContextualFacts(params: {
     userId: string;
     query: string;
+    profileContext?: string;
     limit?: number;
   }): Promise<MemoryFact[]> {
-    const { embedding } = await embedQuery(params.query);
+    // Enrich query with profile context for better semantic matching
+    // "hola" → "hola, contexto: Carlos, esposa Maria, ingeniero"
+    const enrichedQuery = params.profileContext
+      ? `${params.query}. Contexto del usuario: ${params.profileContext}`
+      : params.query;
+
+    const { embedding } = await embedQuery(enrichedQuery);
 
     const facts = await searchSimilarFacts({
       userId: params.userId,
       embedding,
-      limit: params.limit ?? 5,
+      limit: params.limit ?? LIMITS.MEMORY_RETRIEVAL_TOP_K,
       threshold: LIMITS.MEMORY_SEARCH_THRESHOLD,
     });
 
     this.logger.debug(
-      `Found ${facts.length} relevant facts for user ${params.userId}`,
+      `Found ${facts.length} contextual facts for user ${params.userId}`,
     );
 
     return facts;

@@ -64,6 +64,36 @@ export async function saveMemoryFact(params: {
   return mapToMemoryFact(row);
 }
 
+/**
+ * Get the user's most important facts regardless of query.
+ * These are "profile" facts — always loaded in every message.
+ * Returns facts with importance >= threshold, ordered by importance DESC.
+ */
+export async function getProfileFacts(
+  userId: string,
+  limit = 5,
+  importanceThreshold = 0.85,
+): Promise<MemoryFact[]> {
+  const rows = await query(
+    `SELECT * FROM memory_facts
+     WHERE user_id = $1 AND importance >= $2
+     ORDER BY importance DESC, updated_at DESC
+     LIMIT $3`,
+    [userId, importanceThreshold, limit],
+  );
+
+  // Update last_accessed_at for profile facts
+  const ids = rows.map((r) => r.id as string);
+  if (ids.length > 0) {
+    await query(
+      `UPDATE memory_facts SET last_accessed_at = NOW() WHERE id = ANY($1)`,
+      [ids],
+    );
+  }
+
+  return rows.map(mapToMemoryFact);
+}
+
 export async function searchSimilarFacts(params: {
   userId: string;
   embedding: number[];

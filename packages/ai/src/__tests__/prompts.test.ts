@@ -61,7 +61,8 @@ describe("buildSystemPrompt", () => {
       assistant,
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
     expect(result).toContain(assistant.personalityBase);
@@ -75,7 +76,8 @@ describe("buildSystemPrompt", () => {
       assistant,
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
     expect(result).toContain("Preferencias del usuario");
@@ -87,7 +89,8 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant({ learnedPreferences: "" }),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
     expect(result).not.toContain("Preferencias del usuario");
@@ -98,13 +101,14 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant({ learnedPreferences: "   " }),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
     expect(result).not.toContain("Preferencias del usuario");
   });
 
-  it("wraps relevant facts in memory_facts tags", () => {
+  it("includes memory facts in context section", () => {
     const facts = [
       createMockFact({ content: "Tiene un perro llamado Rocky" }),
       createMockFact({ id: "fact-2", content: "Vive en Guadalajara" }),
@@ -114,11 +118,12 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant(),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: facts,
+      profileFacts: [],
+      contextFacts: facts,
     });
 
-    expect(result).toContain("<memory_facts>");
-    expect(result).toContain("</memory_facts>");
+    expect(result).toContain("<context_memory>");
+    expect(result).toContain("</context_memory>");
     expect(result).toContain("- Tiene un perro llamado Rocky");
     expect(result).toContain("- Vive en Guadalajara");
   });
@@ -128,11 +133,36 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant(),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
-    expect(result).not.toContain("<memory_facts>");
-    expect(result).not.toContain("</memory_facts>");
+    expect(result).not.toContain("<profile>");
+    expect(result).not.toContain("<context_memory>");
+  });
+
+  it("includes profile and context sections separately", () => {
+    const profileFact = {
+      id: "p1", userId: "u1", content: "Esposa se llama Maria",
+      category: "relationship" as const, importance: 0.9,
+      createdAt: new Date(), updatedAt: new Date(),
+    };
+    const contextFact = {
+      id: "c1", userId: "u1", content: "Le gusta el cafe",
+      category: "preference" as const, importance: 0.5,
+      createdAt: new Date(), updatedAt: new Date(),
+    };
+    const result = buildSystemPrompt({
+      assistant: createMockAssistant(),
+      timezone: "America/Mexico_City",
+      language: "es",
+      profileFacts: [profileFact],
+      contextFacts: [contextFact],
+    });
+    expect(result).toContain("<profile>");
+    expect(result).toContain("Esposa se llama Maria");
+    expect(result).toContain("<context_memory>");
+    expect(result).toContain("Le gusta el cafe");
   });
 
   it("includes current date/time text", () => {
@@ -140,7 +170,8 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant(),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
     expect(result).toContain("Fecha y hora actual para el usuario:");
@@ -151,7 +182,8 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant(),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
       skillInstructions: [
         "- save_fact: Guarda hechos del usuario",
         "- get_weather: Clima actual",
@@ -168,7 +200,8 @@ describe("buildSystemPrompt", () => {
       assistant: createMockAssistant(),
       timezone: "America/Mexico_City",
       language: "es",
-      relevantFacts: [],
+      profileFacts: [],
+      contextFacts: [],
     });
 
     expect(result).toContain("PROACTIVO");

@@ -103,6 +103,9 @@ export class ConversationService {
       historyForLLM.push({ role: "user", content: incomingText });
     }
 
+    // Layer 3: Session facts are handled inline through maxSteps tool execution.
+    // When save_fact is called, the result stays in the conversation context.
+
     // 6. Llamar al LLM
     const llmResponse = await generateResponse({
       systemPrompt,
