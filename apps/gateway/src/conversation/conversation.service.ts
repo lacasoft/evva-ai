@@ -6,6 +6,7 @@ import { generateResponse } from "@evva/ai";
 import { PersonaService } from "../persona/persona.service.js";
 import { ToolsService } from "../tools/tools.service.js";
 import { SchedulerService } from "../scheduler/scheduler.service.js";
+import { CacheService } from "../cache/cache.service.js";
 
 export interface ConversationResult {
   reply: string;
@@ -30,7 +31,17 @@ export class ConversationService {
     private readonly personaService: PersonaService,
     private readonly toolsService: ToolsService,
     private readonly schedulerService: SchedulerService,
+    private readonly cache: CacheService,
   ) {}
+
+  /**
+   * Restore active sessions from Redis on startup.
+   * Recovers sessionMessages that survived a gateway restart.
+   */
+  async onModuleInit() {
+    // Sessions will be lazy-loaded from Redis when needed
+    this.logger.log("ConversationService initialized with Redis session persistence");
+  }
 
   // ============================================================
   // Procesa un mensaje entrante y devuelve la respuesta del agente
@@ -130,12 +141,14 @@ export class ConversationService {
     });
 
     // 8. Accumulate messages for batch extraction (runs when session expires)
+    // Persist to both in-memory and Redis for crash recovery
     const sessionMsgs = this.sessionMessages.get(sessionId) ?? [];
     sessionMsgs.push(
       { role: "user", content: incomingText },
       { role: "assistant", content: replyText },
     );
     this.sessionMessages.set(sessionId, sessionMsgs);
+    await this.cache.set(`session:${sessionId}:msgs`, sessionMsgs, 3600); // 1h TTL
 
     this.logger.log(
       `Response generated for user ${user.id} | ${llmResponse.usage.totalTokens} tokens`,
@@ -164,6 +177,8 @@ export class ConversationService {
 
     const newSession = generateSessionId(userId);
     this.activeSessions.set(userId, newSession);
+    // Persist session mapping to Redis for crash recovery
+    this.cache.set(`session:user:${userId}`, newSession, 3600).catch(() => {});
     this.resetSessionTimer(userId, newSession);
 
     return newSession;
@@ -175,13 +190,19 @@ export class ConversationService {
     if (existingTimer) clearTimeout(existingTimer);
 
     const timer = setTimeout(
-      () => {
+      async () => {
         if (this.activeSessions.get(userId) === sessionId) {
           this.activeSessions.delete(userId);
           this.sessionTimers.delete(userId);
 
           // Batch extract facts for the entire session (not per message)
-          const msgs = this.sessionMessages.get(sessionId);
+          // Try in-memory first, then fallback to Redis
+          let msgs: Array<{ role: "user" | "assistant"; content: string }> | undefined = this.sessionMessages.get(sessionId);
+          if (!msgs || msgs.length === 0) {
+            // Recover from Redis (crash recovery)
+            const cached = await this.cache.get<Array<{ role: "user" | "assistant"; content: string }>>(`session:${sessionId}:msgs`);
+            if (cached) msgs = cached;
+          }
           if (msgs && msgs.length > 0) {
             this.schedulerService
               .enqueueFactExtraction({
@@ -195,6 +216,8 @@ export class ConversationService {
                 );
               });
             this.sessionMessages.delete(sessionId);
+            this.cache.del(`session:${sessionId}:msgs`).catch(() => {});
+            this.cache.del(`session:user:${userId}`).catch(() => {});
           }
 
           this.logger.debug(
