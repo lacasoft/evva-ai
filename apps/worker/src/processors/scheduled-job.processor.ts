@@ -59,11 +59,16 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
     try {
       const { query: dbQuery } = await import("@evva/database");
       const rows = await dbQuery(
-        `SELECT * FROM scheduled_reminders
+        `SELECT DISTINCT ON (user_id, message) * FROM scheduled_reminders
          WHERE status = 'pending' AND trigger_at <= NOW()
+         ORDER BY user_id, message, created_at DESC
          LIMIT 10`,
         [],
       );
+
+      if (rows.length > 0) {
+        this.logger.log(`Found ${rows.length} pending DB reminders to process`);
+      }
 
       for (const row of rows) {
         try {
@@ -96,12 +101,14 @@ export class ScheduledJobProcessor implements OnModuleInit, OnModuleDestroy {
             await this.telegramSender.send(Number(row.telegram_id), message);
           }
 
+          // Mark this AND any duplicates as sent
           await dbQuery(
-            "UPDATE scheduled_reminders SET status = 'sent' WHERE id = $1",
-            [row.id],
+            `UPDATE scheduled_reminders SET status = 'sent'
+             WHERE user_id = $1 AND message = $2 AND trigger_at = $3 AND status = 'pending'`,
+            [row.user_id, row.message, row.trigger_at],
           );
 
-          this.logger.log(`DB reminder sent: ${row.id}`);
+          this.logger.log(`DB reminder sent: ${row.id} to telegram ${row.telegram_id}`);
         } catch (err) {
           await dbQuery(
             "UPDATE scheduled_reminders SET status = 'failed' WHERE id = $1",

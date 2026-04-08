@@ -69,7 +69,22 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       throw new Error("No se puede programar un recordatorio en el pasado");
     }
 
-    // Always persist to DB (survives Redis restarts, no delay limits)
+    // Dedup: skip if same user + similar message + same time already pending
+    const existing = await query(
+      `SELECT id FROM scheduled_reminders
+       WHERE user_id = $1 AND status = 'pending'
+         AND trigger_at = $2
+         AND message ILIKE $3
+       LIMIT 1`,
+      [params.userId, params.triggerAt.toISOString(), `%${params.message.slice(0, 30)}%`],
+    );
+
+    if (existing.length > 0) {
+      this.logger.log(`Duplicate reminder skipped for user ${params.userId}: "${params.message.slice(0, 40)}"`);
+      return existing[0].id as string;
+    }
+
+    // Persist to DB (survives Redis restarts, no delay limits)
     await query(
       `INSERT INTO scheduled_reminders (id, user_id, telegram_id, message, assistant_name, additional_context, trigger_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
