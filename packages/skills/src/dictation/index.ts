@@ -7,6 +7,7 @@ export const dictationSkill: SkillDefinition = {
   description: "Genera mensajes formales o informales para el usuario.",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["redactar", "escribir mensaje", "formal", "cortes", "mensaje profesional"],
 
   buildTools: () => ({
     draft_message: tool({

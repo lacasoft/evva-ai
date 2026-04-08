@@ -71,7 +71,7 @@ export class ConversationService {
 
     // 3. Construir tools + instrucciones en una sola llamada (1 query a DB/cache)
     const { tools, promptInstructions } =
-      await this.toolsService.buildToolsAndInstructions(user, assistant);
+      await this.toolsService.buildToolsAndInstructions(user, assistant, incomingText);
 
     // 4. Construir system prompt dinámico con memoria semántica
     const systemPrompt = await this.personaService.buildPromptForMessage({

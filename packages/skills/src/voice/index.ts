@@ -9,6 +9,7 @@ export const voiceSkill: SkillDefinition = {
   description: "Transcripcion de notas de voz usando Whisper via Groq",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["nota de voz", "audio", "mensaje de voz"],
   requiredEnv: ["GROQ_API_KEY"],
 
   // Voice processing happens in TelegramService.handleVoice, not as an LLM tool

@@ -10,6 +10,7 @@ export const birthdaysSkill: SkillDefinition = {
     "Detecta y gestiona cumpleanos de personas importantes para el usuario",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["cumpleanos", "cumple", "nacio", "nacimiento", "aniversario"],
 
   buildTools: (ctx) => ({
     save_birthday: tool({

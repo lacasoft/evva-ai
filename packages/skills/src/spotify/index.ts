@@ -17,6 +17,7 @@ export const spotifySkill: SkillDefinition = {
     "Integración con Spotify: ver qué estás escuchando, historial reciente, top tracks y buscar música.",
   category: "utility",
   forProfiles: ["young", "adult"],
+  keywords: ["musica", "cancion", "spotify", "playlist", "escuchar"],
   requiredEnv: ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET"],
   requiresOAuth: "spotify",
 

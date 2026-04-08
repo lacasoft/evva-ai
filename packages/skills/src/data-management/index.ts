@@ -28,6 +28,7 @@ export const dataManagementSkill: SkillDefinition = {
     "Actualiza y elimina datos del usuario: contactos, emergencia, tarjetas, medicamentos, habitos, facts",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["actualizar", "cambiar", "eliminar", "borrar", "modificar", "editar", "corregir"],
 
   buildTools: (ctx) => ({
     update_user_data: tool({

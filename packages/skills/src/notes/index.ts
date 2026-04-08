@@ -15,6 +15,7 @@ export const notesSkill: SkillDefinition = {
   description: "Crea, consulta y modifica notas y listas del usuario",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["nota", "lista", "compra", "pendiente", "tarea", "anotar", "apunte", "super"],
 
   buildTools: (ctx) => ({
     create_note: tool({

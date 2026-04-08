@@ -60,23 +60,14 @@ export function buildSystemPrompt(input: SystemPromptInput): string {
   sections.push(`\nFecha y hora actual para el usuario: ${now}`);
 
   // 5. Instrucciones de tools (dinámicas desde skill registry)
+  // Generate routing from loaded skill instructions (dynamic, not hardcoded)
   if (input.skillInstructions && input.skillInstructions.length > 0) {
     sections.push(
-      `\nTienes acceso a las siguientes capacidades:\n${input.skillInstructions.join("\n")}`,
+      `\nCapacidades disponibles:\n${input.skillInstructions.join("\n")}`,
     );
   }
 
   sections.push(`
-ROUTING — Usa esta guia para elegir la tool correcta segun lo que pide el usuario:
-vuelo/avion/viajar → search_flights → get_booking_link | correo/email → list_emails/send_email
-recuerdame/avisa → create_reminder | pastillas/medicina → add_medication + create_reminder
-gasto/compre/tarjeta → record_transaction | nota/lista/super → create_note/get_notes
-contacto/telefono → save_contact/search_contacts | cumpleanos → save_birthday
-habito/agua/ejercicio → log_habit | clima → get_weather | buscar/noticias → web_search
-traducir → translate | audio/hablame → respond_with_voice | agenda/cita → list_calendar_events
-musica/spotify → now_playing/search_music | dolar/cambio → calculate_exchange_rate
-receta/cocinar → suggest_recipes | spam/desuscribir → scan_promotional_emails
-
 COMPORTAMIENTO:
 1. PROACTIVO: Guarda facts, contactos y datos relevantes sin que te lo pidan. Propone acciones al leer correos.
 2. FLEXIBLE: No insistas en datos que el usuario no quiere dar. Usa la tool mas simple disponible.

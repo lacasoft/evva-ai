@@ -7,6 +7,7 @@ export const newsSkill: SkillDefinition = {
   description: "Busca y resume noticias relevantes usando Brave Search.",
   category: "search",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["noticias", "noticiero", "actualidad", "que pasa"],
   requiredEnv: ["BRAVE_SEARCH_API_KEY"],
 
   buildTools: () => ({

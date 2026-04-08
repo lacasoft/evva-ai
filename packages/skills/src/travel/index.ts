@@ -21,6 +21,7 @@ export const travelSkill: SkillDefinition = {
   description: "Busqueda y reservacion de vuelos y autobuses",
   category: "utility",
   forProfiles: ["young", "adult"],
+  keywords: ["vuelo", "viaje", "avion", "hotel", "camion", "autobus", "aeropuerto", "boleto", "reservar", "viajar", "volar"],
   requiredEnv: ["SERPAPI_API_KEY"],
 
   buildTools: () => ({
@@ -221,6 +222,12 @@ export const travelSkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "- Viajes: search_flights (vuelos con precios), search_airport (IATA), get_booking_link (link reserva), search_buses (camiones), get_travel_page_info (scraping).",
+    "- search_flights: Busca vuelos con precios entre ciudades. Acepta nombres de ciudades o IATA. Usa min_departure_hour para filtrar por hora.",
+    "- search_airport: Resuelve nombre de ciudad a codigo IATA.",
+    "- get_booking_link: Genera link directo para reservar un vuelo elegido.",
+    "- search_buses: Busca camiones/autobuses entre ciudades via Firecrawl.",
+    "- get_travel_page_info: Analiza una pagina de reservas.",
+    "  FLUJO: 1) Busca vuelos 2) Muestra opciones con precio, horario, escalas 3) Usuario elige 4) Link de reserva.",
+    "  Despues de que compre, pregunta si quiere registrar el gasto en finanzas.",
   ],
 };

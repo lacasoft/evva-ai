@@ -14,6 +14,7 @@ export const skillCreatorSkill: SkillDefinition = {
     "Crea nuevos skills en tiempo de ejecucion cuando el usuario pide funcionalidades que no existen",
   category: "utility",
   forProfiles: ["young", "adult"],
+  keywords: ["crear skill", "nueva habilidad", "personalizado", "extender"],
 
   buildTools: (ctx) => ({
     create_runtime_skill: tool({

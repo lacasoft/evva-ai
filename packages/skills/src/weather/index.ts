@@ -7,6 +7,7 @@ export const weatherSkill: SkillDefinition = {
   description: "Consulta el clima actual de cualquier ciudad.",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["clima", "tiempo", "temperatura", "lluvia", "sol", "nublado", "frio", "calor"],
 
   buildTools: () => ({
     get_weather: tool({

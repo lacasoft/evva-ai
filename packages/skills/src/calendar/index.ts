@@ -14,6 +14,7 @@ export const calendarSkill: SkillDefinition = {
   description: "Integración con Google Calendar: ver eventos y crear citas.",
   category: "communication",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["calendario", "evento", "cita", "reunion", "agenda", "google calendar", "agendar"],
   requiredEnv: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
   requiresOAuth: "google",
 
@@ -210,7 +211,9 @@ export const calendarSkill: SkillDefinition = {
   },
 
   promptInstructions: [
-    "Puedes conectar, listar y crear eventos en Google Calendar del usuario.",
-    "Si el usuario no tiene Google conectado, usa connect_google para generar el link de conexión.",
+    "- connect_google: Genera link para conectar Google (Calendar + Gmail). Un solo link conecta ambos.",
+    "- list_calendar_events: Muestra proximos eventos del calendario.",
+    "- create_calendar_event: Crea un evento. REGLA: Confirma fecha, hora y titulo antes de crear.",
+    "  Usalo cuando diga 'agenda', 'cita', 'reunion', 'evento', 'calendario'.",
   ],
 };

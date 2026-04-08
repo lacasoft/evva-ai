@@ -9,6 +9,7 @@ export const recipesSkill: SkillDefinition = {
     "Sugiere recetas basadas en los ingredientes disponibles del usuario",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["receta", "cocinar", "comida", "ingrediente", "cocina", "preparar", "menu"],
 
   buildTools: (ctx) => ({
     suggest_recipes: tool({

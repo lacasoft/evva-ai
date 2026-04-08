@@ -3,6 +3,7 @@ import type { Tool } from "ai";
 import type { User, Assistant } from "@evva/core";
 import {
   skillRegistry,
+  classifyIntent,
   type SkillContext,
   buildRuntimeTools,
 } from "@evva/skills";
@@ -14,6 +15,7 @@ import { SchedulerService } from "../scheduler/scheduler.service.js";
 @Injectable()
 export class ToolsService {
   private readonly logger = new Logger(ToolsService.name);
+  private readonly sessionSkills = new Map<string, Set<string>>();
 
   constructor(
     private readonly memoryService: MemoryService,
@@ -28,6 +30,7 @@ export class ToolsService {
   async buildToolsAndInstructions(
     user: User,
     assistant: Assistant,
+    message: string,
   ): Promise<{ tools: Record<string, Tool>; promptInstructions: string[] }> {
     const connectedProviders = await this.getConnectedProviders(user.id);
     const ctx: SkillContext = {
@@ -40,8 +43,21 @@ export class ToolsService {
       },
     };
 
-    const tools = skillRegistry.buildAllTools(ctx);
-    const promptInstructions = skillRegistry.getPromptInstructions(ctx);
+    // Intent-based filtering
+    const skillNames = classifyIntent(message, skillRegistry.getEnabled());
+
+    // Session persistence: inherit previous turn's skills
+    const prevSkills = this.sessionSkills.get(user.id);
+    if (prevSkills) {
+      for (const name of prevSkills) skillNames.add(name);
+    }
+    this.sessionSkills.set(user.id, skillNames);
+
+    const tools = skillRegistry.buildFilteredTools(ctx, skillNames);
+    const promptInstructions = skillRegistry.getFilteredPromptInstructions(
+      ctx,
+      skillNames,
+    );
 
     // Load user's runtime skills (declarative HTTP-based skills)
     try {
@@ -55,17 +71,12 @@ export class ToolsService {
           ),
         );
       }
-      if (runtimeSkills.length > 0) {
-        this.logger.debug(
-          `Loaded ${runtimeSkills.length} runtime skills for user ${user.id}`,
-        );
-      }
     } catch (err) {
       this.logger.error(`Failed to load runtime skills: ${err}`);
     }
 
     this.logger.debug(
-      `Built ${Object.keys(tools).length} tools for user ${user.id} (providers: ${connectedProviders.join(",") || "none"})`,
+      `Built ${Object.keys(tools).length} tools from ${skillNames.size} skills for user ${user.id}`,
     );
 
     return { tools, promptInstructions };

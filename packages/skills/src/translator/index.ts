@@ -7,6 +7,7 @@ export const translatorSkill: SkillDefinition = {
   description: "Traduce texto entre idiomas usando el LLM.",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["traducir", "traduccion", "como se dice", "idioma"],
 
   buildTools: () => ({
     translate: tool({

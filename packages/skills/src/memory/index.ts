@@ -11,6 +11,7 @@ export const memorySkill: SkillDefinition = {
     "Guarda hechos importantes sobre el usuario en su memoria permanente",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["recordar", "olvidar", "acuerdo", "dato", "informacion", "fact"],
 
   buildTools: (ctx) => ({
     save_fact: tool({
@@ -56,6 +57,8 @@ export const memorySkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "- save_fact: Guarda un hecho importante del usuario en memoria permanente (nombres, preferencias, fechas, etc.)",
+    "- save_fact: Guarda hechos permanentes del usuario (nombre de familiares, preferencias, alergias, gustos).",
+    "  Usa save_fact PROACTIVAMENTE cuando el usuario comparta info personal. NO lo uses para cumpleanos (usa birthdays), contactos (usa contacts), ni medicamentos (usa health).",
+    "  Importancia: 0.9 critico, 0.5 preferencias, 0.3 datos casuales.",
   ],
 };

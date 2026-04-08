@@ -44,3 +44,6 @@ fly.toml.local
 .claude-flow/
 .mcp.json
 CLAUDE.md
+
+# Qwen Code
+.qwen/

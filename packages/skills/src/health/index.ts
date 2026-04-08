@@ -17,6 +17,7 @@ export const healthSkill: SkillDefinition = {
   description: "Seguimiento de medicamentos y hábitos de salud diarios",
   category: "health",
   forProfiles: ["adult", "senior"],
+  keywords: ["medicamento", "medicina", "pastilla", "habito", "salud", "doctor", "tratamiento", "ejercicio", "agua", "meditacion"],
 
   buildTools: (ctx) => ({
     add_medication: tool({
@@ -212,10 +213,11 @@ export const healthSkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "- add_medication: Registra un medicamento con nombre, dosis, frecuencia y horas de toma",
-    "- get_medications: Muestra los medicamentos activos del usuario",
-    "- create_habit: Crea un hábito para trackear diariamente (agua, ejercicio, lectura, etc.)",
-    "- log_habit: Registra progreso en un hábito existente",
-    "- get_habit_progress: Muestra el progreso de todos los hábitos del día",
+    "- add_medication: Registra medicamento con nombre, dosis, frecuencia y horas de toma.",
+    "- get_medications: Muestra medicamentos activos del usuario.",
+    "- create_habit: Crea habito para trackear diariamente (agua, ejercicio, lectura).",
+    "- log_habit: Registra progreso en un habito. Usalo proactivamente cuando diga 'ya tome agua', 'hice ejercicio'.",
+    "- get_habit_progress: Muestra progreso de todos los habitos del dia.",
+    "  Despues de registrar un medicamento con horarios, ofrece crear recordatorios con create_reminder.",
   ],
 };

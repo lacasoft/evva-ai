@@ -9,6 +9,7 @@ export const visionSkill: SkillDefinition = {
   description: "Analisis de fotos y documentos con Claude Vision",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["foto", "imagen", "documento", "que ves"],
 
   // Photo/document processing happens in TelegramService.handlePhoto/handleDocument
   buildTools: () => ({}),

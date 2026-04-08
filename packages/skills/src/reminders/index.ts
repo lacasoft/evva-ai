@@ -8,6 +8,7 @@ export const remindersSkill: SkillDefinition = {
     "Programa recordatorios para enviar al usuario en un momento especifico",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["recordar", "recordatorio", "avisame", "avisa", "alarma", "programa"],
 
   buildTools: (ctx) => ({
     create_reminder: tool({
@@ -85,6 +86,8 @@ export const remindersSkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "- create_reminder: Programa un recordatorio para una fecha y hora especifica. Funciona con lenguaje natural.",
+    "- create_reminder: Programa recordatorio para fecha y hora especifica.",
+    "  Usalo cuando diga 'recuerdame', 'avisame', 'no se me olvide', 'en X minutos/horas'.",
+    "  Calcula trigger_at a partir de la hora actual del usuario (usa su timezone). Confirma fecha y hora antes de crear.",
   ],
 };

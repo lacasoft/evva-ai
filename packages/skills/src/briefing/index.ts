@@ -9,6 +9,7 @@ export const briefingSkill: SkillDefinition = {
     "Configura el resumen diario matutino con pendientes, notas y contexto del día.",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["resumen diario", "briefing", "resumen manana"],
 
   buildTools: (ctx) => ({
     configure_daily_briefing: tool({
@@ -60,6 +61,8 @@ export const briefingSkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "Puedes activar o configurar el resumen diario matutino con configure_daily_briefing.",
+    "- configure_daily_briefing: Activa o configura el resumen diario matutino.",
+    "  Usalo cuando diga 'resumen diario', 'quiero un briefing', 'mandame un resumen cada manana'.",
+    "  Despues de activar, confirma la hora y describe que incluira: pendientes, calendario, clima, cumpleanos proximos.",
   ],
 };

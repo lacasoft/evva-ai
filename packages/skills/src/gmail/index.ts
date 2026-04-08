@@ -9,6 +9,7 @@ export const gmailSkill: SkillDefinition = {
   description: "Integración con Gmail: leer y enviar correos electrónicos.",
   category: "communication",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["correo", "email", "mail", "gmail", "inbox", "enviar correo", "bandeja"],
   requiredEnv: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
   requiresOAuth: "google",
 
@@ -202,7 +203,11 @@ export const gmailSkill: SkillDefinition = {
   },
 
   promptInstructions: [
-    "Puedes leer y enviar correos desde el Gmail del usuario.",
-    "Usa list_emails para ver correos recientes, read_email para ver el detalle, y send_email para enviar.",
+    "- list_emails: Lista correos recientes del Gmail del usuario. Filtra por no leidos o busqueda.",
+    "- read_email: Lee el contenido completo de un correo especifico.",
+    "- send_email: Envia un correo desde el Gmail del usuario.",
+    "  REGLA: Antes de enviar con send_email, muestra destinatario, asunto y contenido, y pide confirmacion.",
+    "  Si Google no esta conectado, usa connect_google del skill calendar.",
+    "  Al leer correos, propone acciones: recordatorios, notas, agendar citas.",
   ],
 };

@@ -9,6 +9,7 @@ export const contactsSkill: SkillDefinition = {
   description: "Guarda y busca contactos del usuario",
   category: "productivity",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["contacto", "telefono", "numero", "amigo", "familia"],
 
   buildTools: (ctx) => ({
     save_contact: tool({
@@ -89,7 +90,9 @@ export const contactsSkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "- save_contact: Guarda un contacto con nombre, teléfono, email y relación",
-    "- search_contacts: Busca contactos por nombre o relación",
+    "- save_contact: Guarda contacto con nombre, telefono, email y relacion. Usa proactivamente cuando el usuario comparta datos de una persona.",
+    "- search_contacts: Busca contactos por nombre o relacion.",
+    "  Si la relacion es familiar cercana (esposa, hijo, mama), pregunta si tambien es contacto de emergencia.",
+    "  Si ya existe un contacto con ese nombre, muestra el existente y pregunta si quiere actualizarlo.",
   ],
 };

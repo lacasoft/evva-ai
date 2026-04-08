@@ -12,6 +12,7 @@ export const emergencySkill: SkillDefinition = {
   description: "Gestión de contactos de emergencia del usuario",
   category: "health",
   forProfiles: ["senior", "adult"],
+  keywords: ["emergencia", "urgencia", "urgente", "contacto emergencia"],
 
   buildTools: (ctx) => ({
     add_emergency_contact: tool({
@@ -91,7 +92,9 @@ export const emergencySkill: SkillDefinition = {
   }),
 
   promptInstructions: [
-    "- add_emergency_contact: Registra un contacto de emergencia con nombre, teléfono y relación",
-    "- get_emergency_contacts: Muestra los contactos de emergencia del usuario",
+    "- add_emergency_contact: Registra contacto de emergencia con nombre, telefono y relacion.",
+    "- get_emergency_contacts: Muestra contactos de emergencia del usuario.",
+    "  Usalo cuando diga 'emergencia', 'contacto de emergencia', 'si me pasa algo llamen a...'.",
+    "  Despues de guardar un contacto regular con relacion cercana, pregunta si tambien es de emergencia.",
   ],
 };

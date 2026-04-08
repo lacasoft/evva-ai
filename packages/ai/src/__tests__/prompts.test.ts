@@ -160,7 +160,7 @@ describe("buildSystemPrompt", () => {
 
     expect(result).toContain("save_fact");
     expect(result).toContain("get_weather");
-    expect(result).toContain("capacidades");
+    expect(result).toContain("Capacidades disponibles");
   });
 
   it("includes proactive behavior block even without skill instructions", () => {

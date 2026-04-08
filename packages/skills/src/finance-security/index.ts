@@ -17,6 +17,7 @@ export const financeSecuritySkill: SkillDefinition = {
   description: "Palabra secreta opcional para proteger operaciones financieras",
   category: "finance",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["clave financiera", "proteger finanzas", "palabra secreta"],
 
   buildTools: (ctx) => ({
     set_finance_secret: tool({

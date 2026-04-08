@@ -13,6 +13,7 @@ export const ttsSkill: SkillDefinition = {
   description: "Respuestas por nota de voz usando Text-to-Speech",
   category: "utility",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["hablar", "hablame", "manda audio", "voz", "responde con voz"],
 
   buildTools: () => ({
     respond_with_voice: tool({

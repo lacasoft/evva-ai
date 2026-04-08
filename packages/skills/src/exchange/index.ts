@@ -7,6 +7,7 @@ export const exchangeSkill: SkillDefinition = {
   description: "Consulta tipos de cambio y convierte entre divisas.",
   category: "utility",
   forProfiles: ["young", "adult"],
+  keywords: ["tipo de cambio", "dolar", "euro", "divisa", "peso", "convertir moneda"],
 
   buildTools: () => ({
     calculate_exchange_rate: tool({

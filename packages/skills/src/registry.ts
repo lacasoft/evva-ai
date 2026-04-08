@@ -101,6 +101,61 @@ export class SkillRegistry {
     return instructions;
   }
 
+  /** Build tools only for specified skill names */
+  buildFilteredTools(
+    ctx: SkillContext,
+    skillNames: Set<string>,
+  ): Record<string, Tool> {
+    const tools: Record<string, Tool> = {};
+    const connected = ctx.connectedProviders ?? [];
+
+    for (const skill of this.getEnabled()) {
+      if (!skillNames.has(skill.name)) continue;
+
+      if (skill.requiresOAuth && !connected.includes(skill.requiresOAuth)) {
+        // Only expose connect_* tools for unconnected OAuth skills
+        const skillTools = skill.buildTools(ctx);
+        for (const [name, t] of Object.entries(skillTools)) {
+          if (name.startsWith("connect_")) tools[name] = t;
+        }
+        continue;
+      }
+
+      const skillTools = skill.buildTools(ctx);
+      Object.assign(tools, skillTools);
+    }
+
+    return tools;
+  }
+
+  /** Get prompt instructions only for specified skill names */
+  getFilteredPromptInstructions(
+    ctx: SkillContext,
+    skillNames: Set<string>,
+  ): string[] {
+    const connected = ctx.connectedProviders ?? [];
+    const instructions: string[] = [];
+
+    for (const skill of this.getEnabled()) {
+      if (!skillNames.has(skill.name)) continue;
+
+      if (skill.requiresOAuth && !connected.includes(skill.requiresOAuth)) {
+        instructions.push(
+          `- ${skill.name}: Disponible si el usuario conecta ${skill.requiresOAuth}.`,
+        );
+        continue;
+      }
+
+      const pi =
+        typeof skill.promptInstructions === "function"
+          ? skill.promptInstructions(ctx)
+          : skill.promptInstructions;
+      instructions.push(...pi);
+    }
+
+    return instructions;
+  }
+
   /** Get a summary of all skills and their status */
   getSummary(): Array<{
     name: string;

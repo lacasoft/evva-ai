@@ -15,6 +15,7 @@ export const emailCleanerSkill: SkillDefinition = {
     "Analiza correos promocionales y ejecuta desuscripciones automaticas",
   category: "communication",
   forProfiles: ["young", "adult"],
+  keywords: ["limpiar correo", "spam", "desuscribir", "newsletter", "promocion"],
   requiresOAuth: "google",
 
   buildTools: (ctx) => {

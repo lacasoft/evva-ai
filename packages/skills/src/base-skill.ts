@@ -38,6 +38,9 @@ export interface SkillDefinition {
   /** Which user profiles should see this skill in onboarding */
   forProfiles: AgeRange[];
 
+  /** Keywords in Spanish that trigger this skill. Used by intent classifier. */
+  keywords?: string[];
+
   /** Environment variables required (skill is disabled if any are missing) */
   requiredEnv?: string[];
 

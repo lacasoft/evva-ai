@@ -18,6 +18,7 @@ export const financeSkill: SkillDefinition = {
     "Gestión financiera: tarjetas, transacciones, resumen mensual y metas de ahorro",
   category: "finance",
   forProfiles: ["young", "adult"],
+  keywords: ["gasto", "ingreso", "tarjeta", "ahorro", "dinero", "saldo", "pago", "compra", "precio", "costo", "financiero", "presupuesto"],
 
   buildTools: (ctx) => ({
     add_credit_card: tool({

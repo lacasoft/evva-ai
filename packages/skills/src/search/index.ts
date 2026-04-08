@@ -7,6 +7,7 @@ export const searchSkill: SkillDefinition = {
   description: "Busqueda web actualizada via Brave Search",
   category: "search",
   forProfiles: ["young", "adult", "senior"],
+  keywords: ["buscar", "internet", "google", "informacion actual", "web"],
   requiredEnv: ["BRAVE_SEARCH_API_KEY"],
 
   buildTools: () => ({
