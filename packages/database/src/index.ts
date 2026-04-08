@@ -38,6 +38,7 @@ export {
 
 export {
   saveMemoryFact,
+  getProfileFacts,
   searchSimilarFacts,
   getAllUserFacts,
   deleteMemoryFact,

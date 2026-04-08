@@ -15,14 +15,33 @@ export class PersonaService {
     incomingMessage: string;
     skillInstructions: string[];
   }): Promise<string> {
-    const relevantFacts = await this.memoryService.searchRelevantFacts({
+    // Layer 1: Profile facts (always loaded)
+    const profileFacts = await this.memoryService.getProfileFacts(
+      params.user.id,
+    );
+
+    // Build profile context string for query enrichment
+    const profileContext =
+      profileFacts.length > 0
+        ? profileFacts.map((f) => f.content).join(", ")
+        : undefined;
+
+    // Layer 2: Contextual facts (enriched semantic search)
+    const contextFacts = await this.memoryService.searchContextualFacts({
       userId: params.user.id,
       query: params.incomingMessage,
-      limit: 5,
+      profileContext,
+      limit: 8,
     });
 
+    // Deduplicate: remove context facts that are already in profile
+    const profileIds = new Set(profileFacts.map((f) => f.id));
+    const uniqueContextFacts = contextFacts.filter(
+      (f) => !profileIds.has(f.id),
+    );
+
     this.logger.debug(
-      `Building prompt for user ${params.user.id} with ${relevantFacts.length} facts, ${params.skillInstructions.length} instructions`,
+      `Building prompt for user ${params.user.id} with ${profileFacts.length} profile + ${uniqueContextFacts.length} context facts`,
     );
 
     return buildSystemPrompt({
@@ -31,7 +50,8 @@ export class PersonaService {
       timezone: params.user.timezone,
       language: params.user.language,
       gender: params.user.gender,
-      relevantFacts,
+      profileFacts,
+      contextFacts: uniqueContextFacts,
       skillInstructions: params.skillInstructions,
     });
   }

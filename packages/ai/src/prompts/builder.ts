@@ -1,6 +1,4 @@
 import type { Assistant, MemoryFact, Message } from "@evva/core";
-import { PROMPT_TOKENS } from "@evva/core";
-
 // ============================================================
 // buildSystemPrompt — arma el system prompt completo por usuario
 // ============================================================
@@ -11,7 +9,8 @@ export interface SystemPromptInput {
   timezone: string;
   language: "es" | "en";
   gender?: "male" | "female" | "neutral";
-  relevantFacts: MemoryFact[];
+  profileFacts: MemoryFact[];      // always-loaded core identity
+  contextFacts: MemoryFact[];      // relevant to current message
   skillInstructions?: string[];
 }
 
@@ -33,15 +32,16 @@ export function buildSystemPrompt(input: SystemPromptInput): string {
     );
   }
 
-  // 3. Facts relevantes recuperados de memoria
-  if (input.relevantFacts.length > 0) {
-    const factsText = input.relevantFacts
-      .map((f) => `- ${f.content}`)
-      .join("\n");
+  // 3a. Profile facts (always present — core identity)
+  if (input.profileFacts.length > 0) {
+    const profileText = input.profileFacts.map((f) => `- ${f.content}`).join("\n");
+    sections.push(`\n<profile>\nDatos permanentes del usuario:\n${profileText}\n</profile>`);
+  }
 
-    sections.push(
-      `\n${PROMPT_TOKENS.FACTS_SECTION_START}\nEstos son hechos que recuerdas sobre el usuario:\n${factsText}\n${PROMPT_TOKENS.FACTS_SECTION_END}`,
-    );
+  // 3b. Context facts (relevant to current message)
+  if (input.contextFacts.length > 0) {
+    const contextText = input.contextFacts.map((f) => `- ${f.content}`).join("\n");
+    sections.push(`\n<context_memory>\nDatos relevantes para esta conversacion:\n${contextText}\n</context_memory>`);
   }
 
   // 4. Contexto temporal

@@ -18,10 +18,16 @@ export const LIMITS = {
   CONVERSATION_WINDOW: 6,
 
   // Cuántos facts recuperar por búsqueda semántica
-  MEMORY_RETRIEVAL_TOP_K: 5,
+  MEMORY_RETRIEVAL_TOP_K: 10,
 
   // Umbral de similaridad para búsqueda semántica (0.0 - 1.0)
-  MEMORY_SEARCH_THRESHOLD: 0.65,
+  MEMORY_SEARCH_THRESHOLD: 0.55,
+
+  // Max profile facts (always-loaded core identity)
+  MEMORY_PROFILE_TOP_K: 5,
+
+  // Minimum importance for a fact to be considered "profile"
+  MEMORY_PROFILE_IMPORTANCE: 0.85,
 
   // Umbral para considerar un fact como duplicado (0.0 - 1.0)
   MEMORY_DEDUP_THRESHOLD: 0.92,
