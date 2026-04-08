@@ -22,9 +22,9 @@ export const dictationSkill: SkillDefinition = {
             "Propósito del mensaje (pedir permiso, agradecer, reclamar, etc.)",
           ),
         tone: z
-          .enum(["formal", "informal", "friendly", "professional"])
+          .string()
           .default("professional")
-          .describe("Tono del mensaje"),
+          .describe("Tono: formal, informal, friendly, professional, casual, urgent, etc."),
         key_points: z
           .array(z.string())
           .optional()

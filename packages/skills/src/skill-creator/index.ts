@@ -31,15 +31,9 @@ export const skillCreatorSkill: SkillDefinition = {
           ),
         description: z.string().describe("Descripcion del skill"),
         category: z
-          .enum([
-            "productivity",
-            "communication",
-            "finance",
-            "health",
-            "utility",
-            "search",
-          ])
-          .default("utility"),
+          .string()
+          .default("utility")
+          .describe("Categoria del skill: productivity, communication, finance, health, utility, search, shopping, travel, etc."),
         tools: z
           .array(
             z.object({
@@ -50,6 +44,7 @@ export const skillCreatorSkill: SkillDefinition = {
                   z.object({
                     type: z
                       .enum(["string", "number", "boolean"])
+                      .optional()
                       .default("string"),
                     description: z.string(),
                   }),

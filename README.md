@@ -13,8 +13,8 @@
   <a href="https://github.com/lacasoft/evva-ai/releases"><img src="https://img.shields.io/github/v/release/lacasoft/evva-ai?style=flat-square" alt="Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
   <img src="https://img.shields.io/badge/node-%3E%3D22-green?style=flat-square" alt="Node" />
-  <img src="https://img.shields.io/badge/skills-25-purple?style=flat-square" alt="Skills" />
-  <img src="https://img.shields.io/badge/tools-50-orange?style=flat-square" alt="Tools" />
+  <img src="https://img.shields.io/badge/skills-28-purple?style=flat-square" alt="Skills" />
+  <img src="https://img.shields.io/badge/tools-60-orange?style=flat-square" alt="Tools" />
   <img src="https://img.shields.io/badge/channels-2-teal?style=flat-square" alt="Channels" />
 </p>
 
@@ -46,6 +46,9 @@
 | **Language** Translation & smart dictation | **Music** Spotify integration |
 | **Exchange** Live currency conversion | **Birthday** Proactive birthday reminders |
 | **Recipe** Recipe suggestions from grocery lists | **WhatsApp** Multi-channel (Telegram + WhatsApp) |
+| **Plane** Flight search (SerpAPI) + bus search (Firecrawl) | **Broom** Auto-unsubscribe from newsletters |
+| **Speaker** Voice responses (OpenAI TTS) | **Puzzle** Self-extending runtime skills |
+| **Pencil** Update and delete user data | |
 
 ---
 
@@ -177,7 +180,7 @@ evva/
 │   ├── core/                    # Shared types, constants, and utils
 │   ├── database/                # PostgreSQL client (pg) and repositories
 │   ├── ai/                      # LLM (Claude), embeddings (Voyage), prompts
-│   └── skills/                  # Modular skill plugins (25 skills)
+│   └── skills/                  # Modular skill plugins (28 skills)
 │       └── src/
 │           ├── registry.ts           # Central skill registry
 │           ├── base-skill.ts         # SkillDefinition interface
@@ -206,6 +209,9 @@ evva/
 │           ├── recipes/              # Recipe suggestions
 │           ├── voice/                # Voice note transcription
 │           ├── vision/               # Photo and document analysis
+│           ├── travel/               # Flight and bus search
+│           ├── email-cleaner/        # Auto-unsubscribe from newsletters
+│           ├── tts/                  # Text-to-speech voice responses
 │           └── skill-creator/        # Self-extending runtime skills
 │
 └── docs/                        # Setup guides and documentation
@@ -353,6 +359,16 @@ The skill is automatically available to the LLM. No other files need to change.
 | `top_tracks` | Show user's top tracks | Spotify OAuth |
 | `search_music` | Search Spotify catalog | Spotify OAuth |
 
+### Travel
+
+| Tool | Description | Requires |
+|:--|:--|:--|
+| `search_flights` | Search flights between cities | `SERPAPI_API_KEY` |
+| `search_airport` | Find airport codes by city name | `SERPAPI_API_KEY` |
+| `get_booking_link` | Get a booking link for a flight | `SERPAPI_API_KEY` |
+| `search_buses` | Search bus routes between cities | `FIRECRAWL_API_KEY` |
+| `get_travel_page_info` | Extract details from a travel page | `FIRECRAWL_API_KEY` |
+
 ### Data Management
 
 | Tool | Description | Requires |
@@ -375,15 +391,15 @@ Evva is designed to minimize LLM token consumption per message:
 | Conversation history window | 12 messages | 6 messages | ~480 tokens |
 | maxSteps (tool call rounds) | 3 | 2 | ~5,400 tokens |
 | System prompt (behavioral block) | 225 tokens | 80 tokens | ~145 tokens |
-| OAuth skill filtering | All 42 tools always loaded | Only connected tools loaded | ~2,000 tokens |
+| OAuth skill filtering | All 60 tools always loaded | Only connected tools loaded | ~2,000 tokens |
 | Provider query | 2 DB calls per message | 1 cached call (Redis 5min TTL) | Latency |
 | Skill registry | env check on every call | Cached after first call | CPU |
 
 **Estimated total reduction: ~55% (from ~23K to ~10K tokens per message)**
 
 ```
-Before:  [system ~1,400] + [42 tools ~3,000] + [history ~960] x 3 steps = ~23,000 tokens
-After:   [system ~1,200] + [~20 tools ~1,500] + [history ~480] x 2 steps = ~10,000 tokens
+Before:  [system ~1,400] + [60 tools ~4,200] + [history ~960] x 3 steps = ~27,000 tokens
+After:   [system ~1,200] + [~25 tools ~1,800] + [history ~480] x 2 steps = ~11,000 tokens
 ```
 
 ---

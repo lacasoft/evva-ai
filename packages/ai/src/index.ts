@@ -6,3 +6,5 @@ export * from "./google/calendar.js";
 export * from "./google/gmail.js";
 export * from "./spotify/client.js";
 export * from "./tts/edge-tts.js";
+export * from "./travel/flights.js";
+export * from "./travel/firecrawl.js";
