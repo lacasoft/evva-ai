@@ -13,8 +13,8 @@
   <a href="https://github.com/lacasoft/evva-ai/releases"><img src="https://img.shields.io/github/v/release/lacasoft/evva-ai?style=flat-square" alt="Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
   <img src="https://img.shields.io/badge/node-%3E%3D22-green?style=flat-square" alt="Node" />
-  <img src="https://img.shields.io/badge/skills-25-purple?style=flat-square" alt="Skills" />
-  <img src="https://img.shields.io/badge/tools-50-orange?style=flat-square" alt="Tools" />
+  <img src="https://img.shields.io/badge/skills-28-purple?style=flat-square" alt="Skills" />
+  <img src="https://img.shields.io/badge/tools-60-orange?style=flat-square" alt="Tools" />
   <img src="https://img.shields.io/badge/channels-2-teal?style=flat-square" alt="Channels" />
 </p>
 
@@ -46,6 +46,9 @@
 | **Language** Traduccion y dictado inteligente | **Music** Integracion con Spotify |
 | **Exchange** Conversion de divisas en tiempo real | **Birthday** Recordatorios proactivos de cumpleanos |
 | **Recipe** Sugerencias de recetas desde listas de compras | **WhatsApp** Multi-canal (Telegram + WhatsApp) |
+| **Plane** Busqueda de vuelos (SerpAPI) + autobuses (Firecrawl) | **Broom** Desuscripcion automatica de newsletters |
+| **Speaker** Respuestas por voz (OpenAI TTS) | **Puzzle** Skills auto-extensibles en tiempo de ejecucion |
+| **Pencil** Actualizar y eliminar datos de usuario | |
 
 ---
 
@@ -177,7 +180,7 @@ evva/
 │   ├── core/                    # Tipos, constantes y utilidades compartidas
 │   ├── database/                # Cliente PostgreSQL (pg) y repositorios
 │   ├── ai/                      # LLM (Claude), embeddings (Voyage), prompts
-│   └── skills/                  # Plugins de skills modulares (25 skills)
+│   └── skills/                  # Plugins de skills modulares (28 skills)
 │       └── src/
 │           ├── registry.ts           # Registro central de skills
 │           ├── base-skill.ts         # Interfaz SkillDefinition
@@ -206,6 +209,9 @@ evva/
 │           ├── recipes/              # Sugerencias de recetas
 │           ├── voice/                # Transcripcion de notas de voz
 │           ├── vision/               # Analisis de fotos y documentos
+│           ├── travel/               # Busqueda de vuelos y autobuses
+│           ├── email-cleaner/        # Desuscripcion automatica de newsletters
+│           ├── tts/                  # Respuestas de voz texto-a-habla
 │           └── skill-creator/        # Skills en tiempo de ejecucion auto-extensibles
 │
 └── docs/                        # Guias de instalacion y documentacion
@@ -353,6 +359,16 @@ El skill queda automaticamente disponible para el LLM. No es necesario modificar
 | `top_tracks` | Mostrar canciones mas escuchadas del usuario | Spotify OAuth |
 | `search_music` | Buscar en el catalogo de Spotify | Spotify OAuth |
 
+### Viajes
+
+| Herramienta | Descripcion | Requiere |
+|:--|:--|:--|
+| `search_flights` | Buscar vuelos entre ciudades | `SERPAPI_API_KEY` |
+| `search_airport` | Encontrar codigos de aeropuerto por ciudad | `SERPAPI_API_KEY` |
+| `get_booking_link` | Obtener enlace de reserva para un vuelo | `SERPAPI_API_KEY` |
+| `search_buses` | Buscar rutas de autobus entre ciudades | `FIRECRAWL_API_KEY` |
+| `get_travel_page_info` | Extraer detalles de una pagina de viajes | `FIRECRAWL_API_KEY` |
+
 ### Gestion de Datos
 
 | Herramienta | Descripcion | Requiere |
@@ -375,15 +391,15 @@ Evva esta disenado para minimizar el consumo de tokens LLM por mensaje:
 | Ventana de historial de conversacion | 12 mensajes | 6 mensajes | ~480 tokens |
 | maxSteps (rondas de llamadas a herramientas) | 3 | 2 | ~5,400 tokens |
 | Prompt de sistema (bloque de comportamiento) | 225 tokens | 80 tokens | ~145 tokens |
-| Filtrado de skills OAuth | Las 42 herramientas siempre cargadas | Solo herramientas conectadas cargadas | ~2,000 tokens |
+| Filtrado de skills OAuth | Las 60 herramientas siempre cargadas | Solo herramientas conectadas cargadas | ~2,000 tokens |
 | Consulta de proveedor | 2 llamadas a BD por mensaje | 1 llamada cacheada (Redis 5min TTL) | Latencia |
 | Registro de skills | Verificacion de env en cada llamada | Cacheado despues de la primera llamada | CPU |
 
 **Reduccion total estimada: ~55% (de ~23K a ~10K tokens por mensaje)**
 
 ```
-Antes:   [system ~1,400] + [42 tools ~3,000] + [history ~960] x 3 steps = ~23,000 tokens
-Despues: [system ~1,200] + [~20 tools ~1,500] + [history ~480] x 2 steps = ~10,000 tokens
+Antes:   [system ~1,400] + [60 tools ~4,200] + [history ~960] x 3 steps = ~27,000 tokens
+Despues: [system ~1,200] + [~25 tools ~1,800] + [history ~480] x 2 steps = ~11,000 tokens
 ```
 
 ---

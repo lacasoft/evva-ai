@@ -31,11 +31,13 @@ export const healthSkill: SkillDefinition = {
           .optional()
           .describe('Dosis (ej: "1 pastilla", "10ml")'),
         frequency: z
-          .enum(["daily", "twice_daily", "three_times", "weekly"])
+          .string()
           .default("daily")
-          .describe("Frecuencia"),
+          .describe("Frecuencia: daily, twice_daily, three_times, weekly, monthly, as_needed"),
         times: z
           .array(z.string())
+          .optional()
+          .default([])
           .describe('Horas de toma en formato HH:MM (ej: ["08:00", "20:00"])'),
         notes: z
           .string()

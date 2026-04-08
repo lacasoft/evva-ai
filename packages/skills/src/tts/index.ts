@@ -28,9 +28,9 @@ export const ttsSkill: SkillDefinition = {
             "El texto que se convertira a voz. Escribe de forma natural, como si hablaras.",
           ),
         language: z
-          .enum(["es", "en"])
+          .string()
           .default("es")
-          .describe("Idioma de la voz"),
+          .describe("Codigo de idioma: es, en, fr, pt, etc."),
       }),
       execute: async ({ text, language }) => {
         // The actual TTS conversion happens in the transport layer

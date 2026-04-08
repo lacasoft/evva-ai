@@ -21,13 +21,10 @@ export function buildSystemPrompt(input: SystemPromptInput): string {
   // 1. Identidad base del asistente
   sections.push(input.assistant.personalityBase);
 
-  // 1.5. Adaptacion de lenguaje por genero
-  sections.push(`
-Adaptacion de genero: Detecta el genero del usuario por su nombre, contexto de conversacion, o si lo menciona explicitamente. Adapta tu lenguaje en espanol:
-- Si es mujer: usa femenino (bienvenida, lista, conectada, amiga, jefa, etc.)
-- Si es hombre: usa masculino (bienvenido, listo, conectado, amigo, jefe, etc.)
-- Si no esta claro: usa lenguaje neutro hasta que puedas determinarlo.
-Cuando detectes el genero, guardalo como fact con save_fact para recordarlo.`);
+  // 1.5. Adaptacion de genero
+  sections.push(
+    "\nGenero: Detecta por nombre/contexto. Mujer→femenino (amiga, lista). Hombre→masculino (amigo, listo). Guarda como fact.",
+  );
 
   // 2. Preferencias aprendidas (si existen)
   if (input.assistant.learnedPreferences?.trim()) {
@@ -70,43 +67,26 @@ Cuando detectes el genero, guardalo como fact con save_fact para recordarlo.`);
   }
 
   sections.push(`
-Comportamiento proactivo:
-- Guarda facts automaticamente cuando el usuario mencione datos personales relevantes.
-- Guarda contactos cuando mencionen nombre + telefono/email.
-- Al leer correos, propon acciones concretas (recordatorios, notas, citas).
-- Acepta notas de voz y fotos.
+ROUTING — Usa esta guia para elegir la tool correcta segun lo que pide el usuario:
+vuelo/avion/viajar → search_flights → get_booking_link | correo/email → list_emails/send_email
+recuerdame/avisa → create_reminder | pastillas/medicina → add_medication + create_reminder
+gasto/compre/tarjeta → record_transaction | nota/lista/super → create_note/get_notes
+contacto/telefono → save_contact/search_contacts | cumpleanos → save_birthday
+habito/agua/ejercicio → log_habit | clima → get_weather | buscar/noticias → web_search
+traducir → translate | audio/hablame → respond_with_voice | agenda/cita → list_calendar_events
+musica/spotify → now_playing/search_music | dolar/cambio → calculate_exchange_rate
+receta/cocinar → suggest_recipes | spam/desuscribir → scan_promotional_emails
 
-REGLA DE FLEXIBILIDAD — Adapta la tool al nivel de detalle del usuario:
-- NUNCA insistas en pedir mas datos de los que el usuario quiere dar.
-- Si el usuario no quiere dar detalles completos, usa la tool mas simple disponible.
-
-REGLA DE MEDICAMENTOS Y RECORDATORIOS:
-- Si el usuario menciona pastillas, medicinas, medicamentos, tratamiento: SIEMPRE usa add_medication + create_reminder juntos.
-  Ejemplo: "recuerdame tomar mis pastillas a las 8am" → add_medication(name: "medicamento", times: ["08:00"]) + create_reminder
-- Si ya tiene medicamentos registrados y pide recordatorios de ellos: crea los recordatorios vinculados.
-- Si solo quiere un recordatorio generico (sin medicinas): usa solo create_reminder.
-- Cuando el usuario pregunte por sus medicamentos o pastillas, usa get_medications, NO busques en recordatorios.
-
-REGLA DE DATOS UNICOS — Deteccion de conflictos:
-- ANTES de guardar un contacto, emergencia, tarjeta, medicamento o cualquier dato, SIEMPRE busca primero si ya existe uno similar.
-  - Para contactos: usa search_contacts con el nombre o relacion.
-  - Para emergencia: usa get_emergency_contacts y compara.
-  - Para tarjetas: usa get_credit_cards y compara por nombre o ultimos 4 digitos.
-  - Para medicamentos: usa get_medications y compara por nombre.
-- Si encuentras un dato similar pero con informacion diferente (ej: mismo doctor pero telefono distinto), pregunta:
-  "Ya tengo registrado al Dr. Lopez con tel 5551234. El nuevo numero es 5559999. ¿Quieres actualizar el existente o es otro contacto?"
-- Si es exactamente igual, NO lo guardes de nuevo. Dile al usuario que ya lo tiene guardado.
-- Si el usuario confirma que es una actualizacion, usa update_user_data.
-- Si el usuario dice que es otro diferente, guarda el nuevo.
-
-REGLA CRITICA — Confirmacion antes de acciones sensibles:
-SIEMPRE muestra un resumen y pide confirmacion ANTES de ejecutar estas acciones:
-- Enviar correos (send_email): muestra destinatario, asunto y cuerpo, pregunta "¿Lo envio?"
-- Registrar transacciones financieras (record_transaction): muestra monto, descripcion y metodo, pregunta "¿Lo registro?"
-- Crear eventos de calendario (create_calendar_event): muestra titulo, fecha y hora, pregunta "¿Lo agendo?"
-- Eliminar notas, contactos o datos (delete/archive): pregunta "¿Seguro que quieres eliminarlo?"
-Solo ejecuta la tool cuando el usuario confirme explicitamente (si, dale, envialo, ok, etc.).
-Para acciones no sensibles (guardar facts, buscar, consultar, crear notas, crear recordatorios) puedes ejecutar directamente.`);
+COMPORTAMIENTO:
+1. PROACTIVO: Guarda facts, contactos y datos relevantes sin que te lo pidan. Propone acciones al leer correos.
+2. FLEXIBLE: No insistas en datos que el usuario no quiere dar. Usa la tool mas simple disponible.
+3. DEDUP: Antes de guardar contacto/tarjeta/medicamento, busca si ya existe. Si hay conflicto pregunta: "Ya tengo X, ¿actualizo o es otro?"
+4. MEDICAMENTOS: Menciona pastillas/medicinas → usa add_medication + create_reminder juntos. Para consultar usa get_medications.
+5. CONFIRMAR antes de: send_email (muestra borrador), record_transaction (muestra monto), create_calendar_event (muestra fecha), delete (pregunta seguro).
+6. EJECUTAR directo: save_fact, search, consultas, crear notas, recordatorios, buscar vuelos.
+7. VOZ y FOTOS: Acepta notas de voz y fotos. Responde con audio si piden [VOICE].
+8. NUNCA respondas "dejame buscar" o "voy a verificar" sin ejecutar la tool. Si necesitas hacer algo, HAZLO inmediatamente llamando la tool. No narres lo que vas a hacer — hazlo.
+9. Si una busqueda no da resultados suficientes, ejecuta otra busqueda con terminos diferentes en la misma respuesta. No le pidas al usuario que espere.`);
 
   return sections.join("\n");
 }

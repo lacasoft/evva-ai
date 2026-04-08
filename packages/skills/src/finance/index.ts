@@ -33,9 +33,9 @@ export const financeSkill: SkillDefinition = {
           .length(4)
           .describe("Últimos 4 dígitos de la tarjeta"),
         brand: z
-          .enum(["visa", "mastercard", "amex", "other"])
+          .string()
           .optional()
-          .describe("Marca de la tarjeta"),
+          .describe("Marca: visa, mastercard, amex, etc."),
         credit_limit: z.number().optional().describe("Límite de crédito"),
         cut_off_day: z.number().min(1).max(31).describe("Día de corte (1-31)"),
         payment_due_day: z
@@ -137,9 +137,9 @@ export const financeSkill: SkillDefinition = {
             "Categoría: food, transport, housing, health, entertainment, shopping, education, services, salary, freelance, etc.",
           ),
         payment_method: z
-          .enum(["cash", "debit", "credit"])
+          .string()
           .optional()
-          .describe("Método de pago"),
+          .describe("Metodo de pago: cash, debit, credit, transfer, etc."),
         credit_card_last_four: z
           .string()
           .optional()

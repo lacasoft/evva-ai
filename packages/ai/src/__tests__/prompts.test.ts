@@ -171,7 +171,7 @@ describe("buildSystemPrompt", () => {
       relevantFacts: [],
     });
 
-    expect(result).toContain("proactivo");
+    expect(result).toContain("PROACTIVO");
   });
 });
 

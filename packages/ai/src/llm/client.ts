@@ -66,7 +66,7 @@ export async function generateResponse(
     maxTokens: request.maxTokens ?? 1024,
     temperature: request.temperature ?? 0.7,
     maxRetries: 2,
-    maxSteps: 2, // Tool call → respuesta (reduce re-envío de contexto)
+    maxSteps: 4, // Permite: tool call → resultado → 2da tool call → respuesta final
     abortSignal: AbortSignal.timeout(LIMITS.LLM_TIMEOUT_MS),
   });
 

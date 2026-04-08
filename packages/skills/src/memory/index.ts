@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { saveMemoryFact } from "@evva/database";
 import { embedText } from "@evva/ai";
+import type { MemoryCategory } from "@evva/core";
 import type { SkillDefinition } from "../base-skill.js";
 
 export const memorySkill: SkillDefinition = {
@@ -23,16 +24,8 @@ export const memorySkill: SkillDefinition = {
           .string()
           .describe("El hecho a guardar, escrito de forma clara y concisa"),
         category: z
-          .enum([
-            "personal",
-            "relationship",
-            "work",
-            "preference",
-            "goal",
-            "reminder",
-            "other",
-          ])
-          .describe("La categoría del hecho"),
+          .string()
+          .describe("Categoria: personal, relationship, work, preference, goal, reminder, other"),
         importance: z
           .number()
           .min(0.1)
@@ -49,7 +42,7 @@ export const memorySkill: SkillDefinition = {
           await saveMemoryFact({
             userId: ctx.user.id,
             content,
-            category,
+            category: category as MemoryCategory,
             importance,
             embedding,
           });

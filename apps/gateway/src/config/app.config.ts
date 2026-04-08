@@ -73,6 +73,18 @@ const envSchema = z.object({
     .optional()
     .transform((v) => v || undefined),
 
+  // SerpAPI — Flight search via Google Flights (https://serpapi.com)
+  SERPAPI_API_KEY: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+
+  // Firecrawl — Web scraping for bus search (https://firecrawl.dev)
+  FIRECRAWL_API_KEY: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+
   // WhatsApp Cloud API (opcional — habilita el adapter de WhatsApp)
   WHATSAPP_ACCESS_TOKEN: z
     .string()

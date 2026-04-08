@@ -33,7 +33,7 @@ export const LIMITS = {
   TELEGRAM_MAX_MESSAGE_LENGTH: 4096,
 
   // Tiempo máximo de espera para respuesta del LLM (ms)
-  LLM_TIMEOUT_MS: 30_000,
+  LLM_TIMEOUT_MS: 60_000,
 
   // Reintentos máximos para jobs fallidos
   JOB_MAX_ATTEMPTS: 3,
